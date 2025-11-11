@@ -109,7 +109,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { model: \"gpt-4o-mini\", messages: $json.messages, temperature: 0.7 } }}",
+        "jsonBody": "={{ { model: \"gpt-4o-mini\", messages: $('Build Messages').first().json.messages, temperature: 0.7 } }}",
         "options": {}
       },
       "id": "openai-http",
