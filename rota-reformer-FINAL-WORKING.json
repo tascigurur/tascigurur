@@ -74,7 +74,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"text\": \"{{ $json.customerMessage }}\"\n}",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  text: $json.customerMessage\n} }}",
         "options": {}
       },
       "id": "send-text-http",
@@ -133,7 +133,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"mediatype\": \"image\",\n  \"media\": \"{{ $json.mediaUrl }}\",\n  \"caption\": \"{{ $json.caption }}\"\n}",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  mediatype: 'image',\n  media: $json.mediaUrl,\n  caption: $json.caption\n} }}",
         "options": {}
       },
       "id": "send-image-http",
@@ -182,7 +182,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"mediatype\": \"document\",\n  \"media\": \"https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN\",\n  \"fileName\": \"Rota-Reformer-Katalog-2025.pdf\",\n  \"caption\": \"Rota Reformer Katalog 2025\"\n}",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  mediatype: 'document',\n  media: 'https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN',\n  fileName: 'Rota-Reformer-Katalog-2025.pdf',\n  caption: 'Rota Reformer Katalog 2025'\n} }}",
         "options": {}
       },
       "id": "send-catalog-http",
@@ -231,7 +231,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"mediatype\": \"image\",\n  \"media\": \"https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0\",\n  \"caption\": \"2025 Fiyat Listesi\"\n}",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  mediatype: 'image',\n  media: 'https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0',\n  caption: '2025 Fiyat Listesi'\n} }}",
         "options": {}
       },
       "id": "send-pricelist-http",
@@ -280,7 +280,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"905539644020\",\n  \"text\": \"🔔 YENI SATIS TALEBI\\n\\nMusteri: {{ $json.recipient }}\\n\\nMesaj:\\n{{ $json.fullAiResponse }}\\n\\nLutfen musteriyi arayin.\"\n}",
+        "jsonBody": "={{ {\n  number: '905539644020',\n  text: `🔔 YENI SATIS TALEBI\n\nMusteri: ${$json.recipient}\n\nMesaj:\n${$json.fullAiResponse}\n\nLutfen musteriyi arayin.`\n} }}",
         "options": {}
       },
       "id": "send-coordinator-http",
