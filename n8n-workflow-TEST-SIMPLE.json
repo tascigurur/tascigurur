@@ -1,0 +1,109 @@
+{
+  "name": "TEST - Single Image No Loop",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "test-single-image",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "test-webhook",
+      "name": "Test Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "test-single-image"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: {\n    recipientNumber: '905539644020',\n    mediaUrl: 'https://drive.google.com/uc?export=download&id=179gnPSBg-_GkSkJgkogd6x7tOb0X3Q0P',\n    caption: 'Test - Combo Cadillac'\n  }\n};"
+      },
+      "id": "test-code",
+      "name": "Test Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.recipientNumber }}"
+            },
+            {
+              "name": "mediatype",
+              "value": "image"
+            },
+            {
+              "name": "media",
+              "value": "={{ $json.mediaUrl }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.caption }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "test-http",
+      "name": "Test HTTP Send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DCU6HslFLtnj77ZK",
+          "name": "httpRequest api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "test-respond",
+      "name": "Test Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [840, 400]
+    }
+  ],
+  "connections": {
+    "Test Webhook": {
+      "main": [[{"node": "Test Code", "type": "main", "index": 0}]]
+    },
+    "Test Code": {
+      "main": [[{"node": "Test HTTP Send", "type": "main", "index": 0}]]
+    },
+    "Test HTTP Send": {
+      "main": [[{"node": "Test Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "TEST-SINGLE-IMAGE",
+  "tags": []
+}
