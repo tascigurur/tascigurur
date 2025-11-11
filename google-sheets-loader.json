@@ -31,7 +31,8 @@
         "sheetName": {
           "__rl": true,
           "value": "Urun Bilgi",
-          "mode": "list"
+          "mode": "name",
+          "cachedResultName": "Urun Bilgi"
         },
         "options": {}
       },
@@ -60,7 +61,8 @@
         "sheetName": {
           "__rl": true,
           "value": "S.S.S",
-          "mode": "list"
+          "mode": "name",
+          "cachedResultName": "S.S.S"
         },
         "options": {}
       },
