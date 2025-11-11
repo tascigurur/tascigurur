@@ -2,15 +2,25 @@
 
 **Pilates ekipmanları satışı için akıllı WhatsApp asistanı**
 
-## 🎯 Sorun ve Çözüm
+## 🚨 v3 - GEREKTİĞİNDE ÇALIŞAN VERSİYON
 
-Önceki workflow'da görseller gönderilmiyordu çünkü **Switch node TAG'leri göremiyordu**.
+### Sorunlar ve Çözümler
 
-**NEDEN?** Format Output node TAG'leri temizliyordu, ama Switch ondan sonra çalışıyordu!
+#### Sorun 1: Gereksiz Koordinatör Mesajları ❌
+Müşteri sadece fiyat sorsa bile koordinatöre mesaj gidiyordu.
 
-**ÇÖZÜM:** AI Agent'tan iki paralel çıkış:
-- Format Output → Müşteriye temiz mesaj
-- Switch → Orijinal TAG'lere bakarak medya gönderimi
+**Çözüm:** AI prompt'u tamamen yeniden yazıldı. TAG'ler SADECE şu durumlarda:
+- Görsel açıkça istendiğinde
+- Satış talebi + müşteri "evet" dediğinde
+- Teknik destek + müşteri onayı
+
+#### Sorun 2: Görseller Gönderilmiyor ❌
+AI "gönderiyorum" diyor ama görseller gitmiyor.
+
+**Çözüm:** "Prepare Data" node'u eklendi:
+- AI output'u normalize ediyor
+- Debug log ekliyor
+- Field adı garantiliyor
 
 ## ✨ Özellikler
 
@@ -34,7 +44,7 @@ cd tascigurur
 ### 2. n8n'e İmport Et
 
 - n8n'i aç
-- "Import from File" → `rota-reformer-whatsapp-workflow-FIXED.json` seç
+- "Import from File" → **`rota-reformer-whatsapp-workflow-v3-WORKING.json`** seç
 - Credentials'ları yapılandır (OpenAI, Evolution API, Postgres, Supabase)
 
 ### 3. Test Et
@@ -48,7 +58,9 @@ Başarılı olursa 3 adet Chair fotoğrafı gelecek! 🎉
 
 ## 📚 Dokümantasyon
 
-Detaylı kurulum ve kullanım için: [WORKFLOW-DOCUMENTATION.md](./WORKFLOW-DOCUMENTATION.md)
+- **v3 Sorun Çözümleri:** [FIX-v3-EXPLANATION.md](./FIX-v3-EXPLANATION.md)
+- **Detaylı Workflow Dok:** [WORKFLOW-DOCUMENTATION.md](./WORKFLOW-DOCUMENTATION.md)
+- **Hızlı Kurulum:** [QUICKSTART.md](./QUICKSTART.md)
 
 ## 🛠️ Teknolojiler
 
@@ -97,4 +109,21 @@ MIT License
 
 ---
 
-**Bu workflow artık GARANTİLİ ÇALIŞIYOR!** 🎉
+## 📦 Workflow Versiyonları
+
+- **v3 (CURRENT):** `rota-reformer-whatsapp-workflow-v3-WORKING.json` - Tüm sorunlar giderildi ✅
+- **v2:** `rota-reformer-whatsapp-workflow-FIXED.json` - Kısmi çalışıyor ⚠️
+- **v1:** `Orijinal workflow` - Çalışmıyor ❌
+
+## 🔧 Debugging
+
+Sorun yaşıyorsan:
+
+1. n8n Execution Log → Her node'un input/output'una bak
+2. Prepare Data node → Console log'u kontrol et
+3. Switch node → Hangi dala girdiğine bak
+4. [FIX-v3-EXPLANATION.md](./FIX-v3-EXPLANATION.md) → Debug rehberini oku
+
+---
+
+**Bu workflow artık GEREKTİĞİNDE ÇALIŞIYOR!** 🎉
