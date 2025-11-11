@@ -167,7 +167,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const buildData = $('Build Messages').first().json;\nconst openaiResponse = $('OpenAI API').first().json;\n\nconst aiMessage = openaiResponse.choices[0].message.content;\nconst recipientNumber = buildData.recipientNumber;\n\nconsole.log('=== AI RESPONSE ===');\nconsole.log(aiMessage);\n\nconst hasImageTag = aiMessage.includes('[IMAGE:');\nconst hasCatalogTag = aiMessage.includes('[CATALOG]');\nconst hasPricelistTag = aiMessage.includes('[PRICELIST]');\nconst hasSalesTag = aiMessage.includes('[SALES]');\n\nlet productName = 'Chair';\nif (hasImageTag) {\n  const match = aiMessage.match(/\\[IMAGE:([^\\]]+)\\]/);\n  if (match) productName = match[1].trim();\n}\n\nlet cleanMessage = aiMessage\n  .replace(/\\[IMAGE:[^\\]]+\\]/g, '')\n  .replace(/\\[CATALOG\\]/g, '')\n  .replace(/\\[PRICELIST\\]/g, '')\n  .replace(/\\[SALES\\]/g, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nif (!cleanMessage || cleanMessage.length === 0) {\n  if (hasCatalogTag) cleanMessage = 'Katalogumuz aşağıda.';\n  else if (hasPricelistTag) cleanMessage = '2025 fiyat listemiz aşağıda.';\n  else if (hasImageTag) cleanMessage = `${productName} görsellerini gönderiyorum.`;\n  else if (hasSalesTag) cleanMessage = 'Koordinatörümüze ilettim, en kısa sürede arayacak.';\n  else cleanMessage = 'Teşekkür ederim!';\n}\n\nreturn {\n  json: {\n    recipient: recipientNumber,\n    customerMessage: cleanMessage,\n    hasImageTag, hasCatalogTag, hasPricelistTag, hasSalesTag,\n    productName, fullAiResponse: aiMessage\n  }\n};"
+        "jsCode": "const buildData = $('Build Messages').first().json;\nconst openaiResponse = $json;\n\nconst aiMessage = openaiResponse.choices[0].message.content;\nconst recipientNumber = buildData.recipientNumber;\n\nconsole.log('=== AI RESPONSE ===');\nconsole.log(aiMessage);\n\nconst hasImageTag = aiMessage.includes('[IMAGE:');\nconst hasCatalogTag = aiMessage.includes('[CATALOG]');\nconst hasPricelistTag = aiMessage.includes('[PRICELIST]');\nconst hasSalesTag = aiMessage.includes('[SALES]');\n\nlet productName = 'Chair';\nif (hasImageTag) {\n  const match = aiMessage.match(/\\[IMAGE:([^\\]]+)\\]/);\n  if (match) productName = match[1].trim();\n}\n\nlet cleanMessage = aiMessage\n  .replace(/\\[IMAGE:[^\\]]+\\]/g, '')\n  .replace(/\\[CATALOG\\]/g, '')\n  .replace(/\\[PRICELIST\\]/g, '')\n  .replace(/\\[SALES\\]/g, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nif (!cleanMessage || cleanMessage.length === 0) {\n  if (hasCatalogTag) cleanMessage = 'Katalogumuz aşağıda.';\n  else if (hasPricelistTag) cleanMessage = '2025 fiyat listemiz aşağıda.';\n  else if (hasImageTag) cleanMessage = `${productName} görsellerini gönderiyorum.`;\n  else if (hasSalesTag) cleanMessage = 'Koordinatörümüze ilettim, en kısa sürede arayacak.';\n  else cleanMessage = 'Teşekkür ederim!';\n}\n\nreturn {\n  json: {\n    recipient: recipientNumber,\n    customerMessage: cleanMessage,\n    hasImageTag, hasCatalogTag, hasPricelistTag, hasSalesTag,\n    productName, fullAiResponse: aiMessage\n  }\n};"
       },
       "id": "parse-response",
       "name": "Parse Response",
@@ -514,19 +514,18 @@
             "node": "Save Assistant Response",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Save Assistant Response": {
-      "main": [
-        [
+          },
           {
             "node": "Parse Response",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Save Assistant Response": {
+      "main": [
+        []
       ]
     },
     "Parse Response": {
