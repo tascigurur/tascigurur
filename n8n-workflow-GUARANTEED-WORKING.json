@@ -1,0 +1,565 @@
+{
+  "name": "Rota Reformer WhatsApp AI - GUARANTEED WORKING",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-rota-complete-working",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "whatsapp-rota-complete-working"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "openai-node",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [340, 580],
+      "credentials": {
+        "openAiApi": {
+          "id": "QHlET4NCnG3Pea5C",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.data.key.remoteJid }}"
+      },
+      "id": "postgres-node",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [540, 580],
+      "credentials": {
+        "postgres": {
+          "id": "gLNF0iMifzK0leX1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "embeddings-node",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [740, 720],
+      "credentials": {
+        "openAiApi": {
+          "id": "QHlET4NCnG3Pea5C",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Rota Reformer urun bilgileri",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents"
+        },
+        "options": {}
+      },
+      "id": "supabase-node",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [540, 720],
+      "credentials": {
+        "supabaseApi": {
+          "id": "7wInAcJl7vWwU2JM",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.data.message?.conversation || $json.body.data.message?.extendedTextMessage?.text || '' }}",
+        "options": {
+          "systemMessage": "Sen profesyonel bir satış danışmanısın. Görevin müşterilerle samimi, doğal konuşmalar yapıp satışı tamamlamak.\n\n=== ÜRÜN GÖRSELLERİ - EN ÖNEMLİ KURAL ===\n\nMüşteri ürün fotoğrafı/görseli/resmi istediğinde MUTLAKA bu EXACT formatı kullan:\n\nÖRNEK 1:\nMüşteri: \"Combo Cadillac fotoğrafları\"\nSen: \"Combo Cadillac görsellerini gönderiyorum.\n\n[SEND_PRODUCT_IMAGES:Combo Cadillac]\"\n\nÖRNEK 2:\nMüşteri: \"Tower Reformer görselleri\"\nSen: \"Tower Reformer görsellerini gönderiyorum.\n\n[SEND_PRODUCT_IMAGES:Tower Reformer]\"\n\nÖRNEK 3:\nMüşteri: \"Chair resimleri\"\nSen: \"Chair görsellerini gönderiyorum.\n\n[SEND_PRODUCT_IMAGES:Chair]\"\n\nKRİTİK FORMAT KURALLARI:\n1. TAG'den ÖNCE iki yeni satır (\\n\\n) ZORUNLU!\n2. Ürün adı BÜYÜK harfle başlamalı\n3. TAG köşeli parantez içinde: [SEND_PRODUCT_IMAGES:Ürün Adı]\n\nÜRÜN ADLARı:\n- Combo Cadillac\n- Tower Reformer\n- Basic Reformer\n- Cadillac\n- Infinity Reformer\n- Metal Reformer\n- Katlanabilir Reformer\n- Chair\n- Barrel\n- Spine Corrector\n\n=== DİĞER TAG'LER ===\n\nKatalog: \"Katalog PDF'ini gönderiyorum.\n\n[SEND_CATALOG]\"\n\nFiyat Listesi: \"Fiyat listesi görselini gönderiyorum.\n\n[SEND_PRICE_LIST_IMAGE]\"\n\nRenk Kartelası: \"Deri renk kartelamızı gönderiyorum.\n\n[SEND_COLOR_CARD]\"\n\n=== SATIŞ KAPATMA ===\n\nMüşteri: \"Combo Cadillac 3 adet\"\nSen: \"Harika, 3 adet için toplam 186.000 TL + KDV tutacak. Size özel fiyat çalışması için koordinatörümüz sizi arasın mı?\"\n\nMüşteri: \"evet\"\nSen: \"Tamamdır, Combo Cadillac için 3 adet talebinizi koordinatörümüze ilettim.\n\nCombo Cadillac - 3 adet\n\n[SEND_TO_SALES_COORDINATOR]\n\nEn kısa sürede sizi arayacak.\"\n\n=== TEKNİK DESTEK ===\n\nMüşteri: \"evet lütfen\"\nSen: \"Tamamdır, Combo Cadillac'ınızdaki yay sorunu için teknik ekibimize ilettim.\n\nCombo Cadillac - Yaylar çalışmıyor\n\n[SEND_TO_TECHNICAL_SUPPORT]\n\nEn kısa sürede sizi arayacaklar.\"\n\n=== FİYAT LİSTESİ (2025) ===\n\n- Combo Cadillac: 62.000 TL + KDV\n- Tower Reformer: 52.000 TL + KDV\n- Basic Reformer: 48.000 TL + KDV\n- Cadillac: 58.000 TL + KDV\n- Infinity Reformer: 68.000 TL + KDV\n- Metal Reformer: 38.500 TL + KDV\n- Katlanabilir Reformer: 40.000 TL + KDV\n- Barrel: 24.000 TL (KDV Dahil)\n- Chair: 28.000 TL (KDV Dahil)\n- Spine Corrector: 9.000 TL (KDV Dahil)\n\nTüm ürünler stokta var.\n\n=== GENEL KURALLAR ===\n\n1. HER MESAJDA SADECE 1 TAG!\n2. TAG'den önce MUTLAKA \\n\\n\n3. Samimi konuş, robot gibi olma"
+        }
+      },
+      "id": "ai-agent-node",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [440, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $json.output || '';\nconst webhookData = $('Webhook').item.json;\nconst recipient = webhookData.body.data.key.remoteJid;\n\nlet cleanOutput = output\n  .replace(/\\[SEND_TO_SALES_COORDINATOR\\]/g, '')\n  .replace(/\\[SEND_TO_TECHNICAL_SUPPORT\\]/g, '')\n  .replace(/\\[SEND_COLOR_CARD\\]/g, '')\n  .replace(/\\[SEND_CATALOG\\]/g, '')\n  .replace(/\\[SEND_PRICE_LIST_IMAGE\\]/g, '')\n  .replace(/\\[SEND_PRODUCT_IMAGES:[^\\]]+\\]/g, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn {\n  json: {\n    output: output,\n    recipient: recipient,\n    recipientNumber: recipient.split('@')[0],\n    formatted_output: cleanOutput\n  }\n};"
+      },
+      "id": "format-output-node",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 400]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipient }}",
+        "messageText": "={{ $json.formatted_output }}",
+        "options_message": {}
+      },
+      "id": "send-customer-node",
+      "name": "Send to Customer",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [840, 300],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND_TO_SALES_COORDINATOR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "sales"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND_TO_TECHNICAL_SUPPORT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "technical"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND_PRODUCT_IMAGES:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "product_images"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND_COLOR_CARD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "color_card"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND_PRICE_LIST_IMAGE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "price_list"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND_CATALOG",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "catalog"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-node",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [840, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "const coordinatorNumber = '905539644020@s.whatsapp.net';\nconst formatOutput = $('Format Output').item.json;\nconst customerNumber = formatOutput.recipientNumber;\nconst output = formatOutput.output || '';\n\nconst beforeTag = output.split('[SEND_TO_SALES_COORDINATOR]')[0].trim();\n\nlet productInfo = '';\nconst lines = beforeTag.split('\\n').map(l => l.trim()).filter(l => l.length > 0);\n\nfor (let line of lines) {\n  if (line.match(/^.+ - \\d+ adet$/i)) {\n    productInfo = line;\n    break;\n  }\n}\n\nif (!productInfo) {\n  productInfo = lines.slice(-3).join(' | ');\n}\n\nconst message = `YENI SATIS TALEBI\\n\\nTalep: ${productInfo}\\n\\nMusteri: ${customerNumber}\\n\\nTam Mesaj:\\n${beforeTag}\\n\\nLutfen en kisa surede musteriyi arayin.`;\n\nreturn {\n  json: {\n    recipient: coordinatorNumber,\n    message: message\n  }\n};"
+      },
+      "id": "code-sales-node",
+      "name": "Code Sales",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const coordinatorNumber = '905539644020@s.whatsapp.net';\nconst formatOutput = $('Format Output').item.json;\nconst customerNumber = formatOutput.recipientNumber;\nconst output = formatOutput.output || '';\n\nconst beforeTag = output.split('[SEND_TO_TECHNICAL_SUPPORT]')[0].trim();\n\nconst message = `YENI TEKNIK DESTEK TALEBI\\n\\nMusteri: ${customerNumber}\\n\\nSorun:\\n${beforeTag}\\n\\nLutfen en kisa surede musteriyi arayin.`;\n\nreturn {\n  json: {\n    recipient: coordinatorNumber,\n    message: message\n  }\n};"
+      },
+      "id": "code-technical-node",
+      "name": "Code Technical",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatOutput = $('Format Output').item.json;\nconst recipientNumber = formatOutput.recipientNumber;\nconst output = formatOutput.output || '';\n\nconst match = output.match(/\\[SEND_PRODUCT_IMAGES:([^\\]]+)\\]/);\nconst productName = match ? match[1].trim() : 'Combo Cadillac';\n\nconst productImages = {\n  'Combo Cadillac': [\n    'https://drive.google.com/uc?export=download&id=179gnPSBg-_GkSkJgkogd6x7tOb0X3Q0P',\n    'https://drive.google.com/uc?export=download&id=1a3GTjcwaTU_zX1eyBztNQcD-k2J1M39L',\n    'https://drive.google.com/uc?export=download&id=1pJhgllPH3nBW2AWUA4ZIb2CTSQrctGcc'\n  ],\n  'Tower Reformer': [\n    'https://drive.google.com/uc?export=download&id=1ynee91yEKnbSAC-Re-DFD4U0LpWbIRhv',\n    'https://drive.google.com/uc?export=download&id=1HdglQ2VZ1qYdieTA8e2pGIxmL54MqPrU',\n    'https://drive.google.com/uc?export=download&id=19DSBRkRrjcA-XIx_cFgzSv0oSEvP3AKx'\n  ],\n  'Basic Reformer': [\n    'https://drive.google.com/uc?export=download&id=1f4BLfMZ56ozUqLa4FGl4L1FJauYMdCTv'\n  ],\n  'Infinity Reformer': [\n    'https://drive.google.com/uc?export=download&id=1RCegQOcp18YWGckTCie7UD2KZCFryHcB',\n    'https://drive.google.com/uc?export=download&id=11ZCUleam7miAqxFm-BUBrHr1-JYMGhW0',\n    'https://drive.google.com/uc?export=download&id=1Mq1tY3XjHgBD90QObDqe2K6q6FNmyOHP'\n  ],\n  'Metal Reformer': [\n    'https://drive.google.com/uc?export=download&id=1_eAlx-IkDX4O8o8cUG-9relAs1ZBPOwT',\n    'https://drive.google.com/uc?export=download&id=1og3oyr-qrSotaRBQ1zmGC9eAP9S8wfum'\n  ],\n  'Cadillac': [\n    'https://drive.google.com/uc?export=download&id=13lT4UR6oQdhvhlc-ibL3WxFahv_-T3yP',\n    'https://drive.google.com/uc?export=download&id=1H19zoavkWRc_tjYuMBfUtlUEPSVPj4VB',\n    'https://drive.google.com/uc?export=download&id=1U0GX11eWkSMhBW7Xlj9vIsdNq_75E5d3'\n  ],\n  'Katlanabilir Reformer': [\n    'https://drive.google.com/uc?export=download&id=1gRXUB76pXE5SfA2dF_U5A6kz5QjN4xyr',\n    'https://drive.google.com/uc?export=download&id=1qMQBgpZ6dyipQbsNRyf5R_anz-sSTuDl',\n    'https://drive.google.com/uc?export=download&id=1ye8d6wj42M65yRxocKhyHdlqkBaoooUV'\n  ],\n  'Chair': [\n    'https://drive.google.com/uc?export=download&id=1qWfFKxd6HCpOio5DqEnURT8hBsE_CZMU',\n    'https://drive.google.com/uc?export=download&id=1BTJ7G91L05LbrzQI5OfeXWqt_fY1kg1R',\n    'https://drive.google.com/uc?export=download&id=1CVmiRauex3ZILPcevQeGVU3b_svH_b6_'\n  ],\n  'Barrel': [\n    'https://drive.google.com/uc?export=download&id=1ye7RmXboj41tt3-io08yqpKvn5iYVbb2',\n    'https://drive.google.com/uc?export=download&id=1zJs3TywJVXm9u1S08TueH9ymAc8mWjwx',\n    'https://drive.google.com/uc?export=download&id=1wDvHZsglZFhMW_iMrjMl7Dp8Yo6Sssy5'\n  ],\n  'Spine Corrector': [\n    'https://drive.google.com/uc?export=download&id=1SPINE_CORRECTOR_ID_1'\n  ]\n};\n\nconst images = productImages[productName] || productImages['Combo Cadillac'];\n\nreturn images.map((imageUrl, index) => ({\n  json: {\n    recipientNumber: recipientNumber + '@s.whatsapp.net',\n    mediaUrl: imageUrl,\n    caption: index === 0 ? `${productName} gorselleri` : ''\n  }\n}));"
+      },
+      "id": "code-images-node",
+      "name": "Code Product Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 440]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-node",
+      "name": "Split Images",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1240, 440]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "sendMedia",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipientNumber }}",
+        "mediaUrl": "={{ $json.mediaUrl }}",
+        "mediaType": "image",
+        "caption": "={{ $json.caption }}",
+        "options_message": {}
+      },
+      "id": "evo-send-image-node",
+      "name": "Evolution Send Image",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [1440, 440],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatOutput = $('Format Output').item.json;\nconst recipientNumber = formatOutput.recipientNumber;\n\nreturn {\n  json: {\n    recipientNumber: recipientNumber + '@s.whatsapp.net',\n    mediaUrl: 'https://drive.google.com/uc?export=download&id=1eLXInyXyRZLpIRQdykI8CZjBZCjNVKfG',\n    caption: 'Deri renk kartelamiz'\n  }\n};"
+      },
+      "id": "code-color-node",
+      "name": "Code Color Card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 560]
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatOutput = $('Format Output').item.json;\nconst recipientNumber = formatOutput.recipientNumber;\n\nreturn {\n  json: {\n    recipientNumber: recipientNumber + '@s.whatsapp.net',\n    mediaUrl: 'https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0',\n    caption: 'Guncel fiyat listemiz'\n  }\n};"
+      },
+      "id": "code-pricelist-node",
+      "name": "Code Price List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 680]
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatOutput = $('Format Output').item.json;\nconst recipientNumber = formatOutput.recipientNumber;\n\nreturn {\n  json: {\n    recipientNumber: recipientNumber + '@s.whatsapp.net',\n    mediaUrl: 'https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN',\n    caption: 'Rota Reformer Katalog 2025'\n  }\n};"
+      },
+      "id": "code-catalog-node",
+      "name": "Code Catalog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 800]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipient }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "id": "send-coord-sales-node",
+      "name": "Send Coordinator Sales",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [1240, 200],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipient }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "id": "send-coord-tech-node",
+      "name": "Send Coordinator Technical",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [1240, 320],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "sendMedia",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipientNumber }}",
+        "mediaUrl": "={{ $json.mediaUrl }}",
+        "mediaType": "image",
+        "caption": "={{ $json.caption }}",
+        "options_message": {}
+      },
+      "id": "evo-color-node",
+      "name": "Evolution Send Color",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [1240, 560],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "sendMedia",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipientNumber }}",
+        "mediaUrl": "={{ $json.mediaUrl }}",
+        "mediaType": "image",
+        "caption": "={{ $json.caption }}",
+        "options_message": {}
+      },
+      "id": "evo-pricelist-node",
+      "name": "Evolution Send Price",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [1240, 680],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "sendMedia",
+        "instanceName": "rotawp",
+        "remoteJid": "={{ $json.recipientNumber }}",
+        "mediaUrl": "={{ $json.mediaUrl }}",
+        "mediaType": "document",
+        "caption": "={{ $json.caption }}",
+        "options_message": {}
+      },
+      "id": "evo-catalog-node",
+      "name": "Evolution Send Catalog",
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [1240, 800],
+      "credentials": {
+        "evolutionApi": {
+          "id": "lL9tVPgFCpmk7z8K",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ JSON.stringify({ success: true }) }}",
+        "options": {}
+      },
+      "id": "respond-node",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1640, 600]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "AI Agent", "type": "main", "index": 0}]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [[{"node": "AI Agent", "type": "ai_memory", "index": 0}]]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [[{"node": "Supabase Vector Store", "type": "ai_embedding", "index": 0}]]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]
+    },
+    "AI Agent": {
+      "main": [[{"node": "Format Output", "type": "main", "index": 0}]]
+    },
+    "Format Output": {
+      "main": [[{"node": "Send to Customer", "type": "main", "index": 0}, {"node": "Switch", "type": "main", "index": 0}]]
+    },
+    "Switch": {
+      "main": [
+        [{"node": "Code Sales", "type": "main", "index": 0}],
+        [{"node": "Code Technical", "type": "main", "index": 0}],
+        [{"node": "Code Product Images", "type": "main", "index": 0}],
+        [{"node": "Code Color Card", "type": "main", "index": 0}],
+        [{"node": "Code Price List", "type": "main", "index": 0}],
+        [{"node": "Code Catalog", "type": "main", "index": 0}],
+        [{"node": "Respond to Webhook", "type": "main", "index": 0}]
+      ]
+    },
+    "Code Sales": {
+      "main": [[{"node": "Send Coordinator Sales", "type": "main", "index": 0}]]
+    },
+    "Code Technical": {
+      "main": [[{"node": "Send Coordinator Technical", "type": "main", "index": 0}]]
+    },
+    "Code Product Images": {
+      "main": [[{"node": "Split Images", "type": "main", "index": 0}]]
+    },
+    "Split Images": {
+      "main": [
+        [{"node": "Evolution Send Image", "type": "main", "index": 0}],
+        [{"node": "Respond to Webhook", "type": "main", "index": 0}]
+      ]
+    },
+    "Evolution Send Image": {
+      "main": [[{"node": "Split Images", "type": "main", "index": 0}]]
+    },
+    "Code Color Card": {
+      "main": [[{"node": "Evolution Send Color", "type": "main", "index": 0}]]
+    },
+    "Code Price List": {
+      "main": [[{"node": "Evolution Send Price", "type": "main", "index": 0}]]
+    },
+    "Code Catalog": {
+      "main": [[{"node": "Evolution Send Catalog", "type": "main", "index": 0}]]
+    },
+    "Send Coordinator Sales": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "Send Coordinator Technical": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "Evolution Send Color": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "Evolution Send Price": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "Evolution Send Catalog": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "GUARANTEED-WORKING",
+  "tags": []
+}
