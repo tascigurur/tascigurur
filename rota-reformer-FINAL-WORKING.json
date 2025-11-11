@@ -1,0 +1,366 @@
+{
+  "name": "Rota Reformer WhatsApp - FINAL WORKING",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-final",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "whatsapp-final"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Sen Rota Reformer satış asistanısın.\\n\\n=== ÜRÜN GÖRSELLERİ ===\\nMüşteri görsel/fotoğraf/resim isterse:\\nÖrnek: Chair görselleri\\nCevap: Chair görsellerini gönderiyorum.\\n[IMAGE:Chair]\\n\\nÜRÜNLER: Combo Cadillac, Tower Reformer, Basic Reformer, Cadillac, Infinity Reformer, Metal Reformer, Katlanabilir Reformer, Chair, Barrel, Spine Corrector\\n\\n=== KATALOG ===\\nKatalog istenirse:\\n[CATALOG]\\n\\n=== FİYAT LİSTESİ ===\\nFiyat listesi istenirse:\\n[PRICELIST]\\n\\n=== SATIŞ ===\\nSadece müşteri 'arasın' derse:\\n[SALES]\\n\\nFİYATLAR:\\nCombo Cadillac: 62.000 TL + KDV\\nTower Reformer: 52.000 TL + KDV\\nChair: 28.000 TL\\nBarrel: 24.000 TL\\n\\nKURALLAR:\\n1. Sadece görsel istenirse [IMAGE:ÜrünAdı]\\n2. Fiyat sorusu → TAG YOK\\n3. TAG önce yeni satır\\n4. Max 1 TAG\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ $json.body.data.message?.conversation || $json.body.data.message?.extendedTextMessage?.text || '' }}\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "id": "openai-http",
+      "name": "OpenAI API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 400],
+      "credentials": {
+        "openAiApi": {
+          "id": "QHlET4NCnG3Pea5C",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookData = $('Webhook').first().json;\nconst openaiResponse = $json;\n\nconst aiMessage = openaiResponse.choices[0].message.content;\nconst recipient = webhookData.body.data.key.remoteJid;\nconst recipientNumber = recipient.split('@')[0];\n\nconsole.log('=== AI RESPONSE ===');\nconsole.log(aiMessage);\nconsole.log('==================');\n\nconst hasImageTag = aiMessage.includes('[IMAGE:');\nconst hasCatalogTag = aiMessage.includes('[CATALOG]');\nconst hasPricelistTag = aiMessage.includes('[PRICELIST]');\nconst hasSalesTag = aiMessage.includes('[SALES]');\n\nlet productName = 'Chair';\nif (hasImageTag) {\n  const match = aiMessage.match(/\\[IMAGE:([^\\]]+)\\]/);\n  if (match) productName = match[1].trim();\n}\n\nconst cleanMessage = aiMessage\n  .replace(/\\[IMAGE:[^\\]]+\\]/g, '')\n  .replace(/\\[CATALOG\\]/g, '')\n  .replace(/\\[PRICELIST\\]/g, '')\n  .replace(/\\[SALES\\]/g, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn {\n  json: {\n    recipient: recipientNumber,\n    customerMessage: cleanMessage,\n    hasImageTag: hasImageTag,\n    hasCatalogTag: hasCatalogTag,\n    hasPricelistTag: hasPricelistTag,\n    hasSalesTag: hasSalesTag,\n    productName: productName,\n    fullAiResponse: aiMessage\n  }\n};"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendText/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"text\": \"{{ $json.customerMessage }}\"\n}",
+        "options": {}
+      },
+      "id": "send-text-http",
+      "name": "Send Text HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasImageTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-image",
+      "name": "IF Image",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [840, 440]
+    },
+    {
+      "parameters": {
+        "jsCode": "const productName = $json.productName;\nconst recipient = $json.recipient;\n\nconst productImages = {\n  'Combo Cadillac': [\n    '179gnPSBg-_GkSkJgkogd6x7tOb0X3Q0P',\n    '1a3GTjcwaTU_zX1eyBztNQcD-k2J1M39L',\n    '1pJhgllPH3nBW2AWUA4ZIb2CTSQrctGcc'\n  ],\n  'Tower Reformer': [\n    '1ynee91yEKnbSAC-Re-DFD4U0LpWbIRhv',\n    '1HdglQ2VZ1qYdieTA8e2pGIxmL54MqPrU',\n    '19DSBRkRrjcA-XIx_cFgzSv0oSEvP3AKx'\n  ],\n  'Chair': [\n    '1qWfFKxd6HCpOio5DqEnURT8hBsE_CZMU',\n    '1BTJ7G91L05LbrzQI5OfeXWqt_fY1kg1R',\n    '1CVmiRauex3ZILPcevQeGVU3b_svH_b6_'\n  ],\n  'Barrel': [\n    '1ye7RmXboj41tt3-io08yqpKvn5iYVbb2',\n    '1zJs3TywJVXm9u1S08TueH9ymAc8mWjwx',\n    '1wDvHZsglZFhMW_iMrjMl7Dp8Yo6Sssy5'\n  ]\n};\n\nconst imageIds = productImages[productName] || productImages['Chair'];\n\nreturn imageIds.map((imageId, index) => ({\n  json: {\n    recipient: recipient,\n    mediaUrl: `https://drive.google.com/uc?export=download&id=${imageId}`,\n    caption: index === 0 ? productName : '',\n    isLast: index === imageIds.length - 1\n  }\n}));"
+      },
+      "id": "prepare-images",
+      "name": "Prepare Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 440]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"mediatype\": \"image\",\n  \"media\": \"{{ $json.mediaUrl }}\",\n  \"caption\": \"{{ $json.caption }}\"\n}",
+        "options": {}
+      },
+      "id": "send-image-http",
+      "name": "Send Image HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1240, 440],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasCatalogTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-catalog",
+      "name": "IF Catalog",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [840, 580]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"mediatype\": \"document\",\n  \"media\": \"https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN\",\n  \"caption\": \"Rota Reformer Katalog 2025\"\n}",
+        "options": {}
+      },
+      "id": "send-catalog-http",
+      "name": "Send Catalog HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 580],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasPricelistTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-pricelist",
+      "name": "IF Pricelist",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [840, 720]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.recipient }}\",\n  \"mediatype\": \"image\",\n  \"media\": \"https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0\",\n  \"caption\": \"2025 Fiyat Listesi\"\n}",
+        "options": {}
+      },
+      "id": "send-pricelist-http",
+      "name": "Send Pricelist HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 720],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasSalesTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-sales",
+      "name": "IF Sales",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [840, 860]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendText/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"905539644020\",\n  \"text\": \"🔔 YENI SATIS TALEBI\\n\\nMusteri: {{ $json.recipient }}\\n\\nMesaj:\\n{{ $json.fullAiResponse }}\\n\\nLutfen musteriyi arayin.\"\n}",
+        "options": {}
+      },
+      "id": "send-coordinator-http",
+      "name": "Send Coordinator HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 860],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={ \"success\": true }",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1440, 580]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "OpenAI API", "type": "main", "index": 0}]]
+    },
+    "OpenAI API": {
+      "main": [[{"node": "Parse Response", "type": "main", "index": 0}]]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {"node": "Send Text HTTP", "type": "main", "index": 0},
+          {"node": "IF Image", "type": "main", "index": 0},
+          {"node": "IF Catalog", "type": "main", "index": 0},
+          {"node": "IF Pricelist", "type": "main", "index": 0},
+          {"node": "IF Sales", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Send Text HTTP": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "IF Image": {
+      "main": [[{"node": "Prepare Images", "type": "main", "index": 0}], []]
+    },
+    "Prepare Images": {
+      "main": [[{"node": "Send Image HTTP", "type": "main", "index": 0}]]
+    },
+    "Send Image HTTP": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "IF Catalog": {
+      "main": [[{"node": "Send Catalog HTTP", "type": "main", "index": 0}], []]
+    },
+    "Send Catalog HTTP": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "IF Pricelist": {
+      "main": [[{"node": "Send Pricelist HTTP", "type": "main", "index": 0}], []]
+    },
+    "Send Pricelist HTTP": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "IF Sales": {
+      "main": [[{"node": "Send Coordinator HTTP", "type": "main", "index": 0}], []]
+    },
+    "Send Coordinator HTTP": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "FINAL-WORKING",
+  "tags": []
+}
