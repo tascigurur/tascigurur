@@ -109,14 +109,13 @@
     },
     {
       "parameters": {
-        "resource": "messages-api",
-        "operation": "sendMedia",
+        "resource": "send-media",
         "instanceName": "rotawp",
         "remoteJid": "={{ $json.recipient }}",
         "mediaUrl": "={{ $json.mediaUrl }}",
         "mediaType": "image",
         "caption": "={{ $json.caption }}",
-        "options_message": {}
+        "options": {}
       },
       "id": "send-images",
       "name": "Send Images",
@@ -149,14 +148,13 @@
     },
     {
       "parameters": {
-        "resource": "messages-api",
-        "operation": "sendMedia",
+        "resource": "send-media",
         "instanceName": "rotawp",
         "remoteJid": "={{ $json.recipient }}",
         "mediaUrl": "https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN",
         "mediaType": "document",
         "caption": "Rota Reformer Katalog 2025",
-        "options_message": {}
+        "options": {}
       },
       "id": "send-catalog",
       "name": "Send Catalog",
@@ -189,14 +187,13 @@
     },
     {
       "parameters": {
-        "resource": "messages-api",
-        "operation": "sendMedia",
+        "resource": "send-media",
         "instanceName": "rotawp",
         "remoteJid": "={{ $json.recipient }}",
         "mediaUrl": "https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0",
         "mediaType": "image",
         "caption": "2025 Fiyat Listesi",
-        "options_message": {}
+        "options": {}
       },
       "id": "send-pricelist",
       "name": "Send Pricelist",
