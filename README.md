@@ -4,21 +4,21 @@
 
 ---
 
-## 🎯 v4: Chat Memory + Google Sheets ⭐ (ÖNERİLEN)
+## 🎯 v4-MEMORY-ONLY: Chat Memory ⭐ (ÖNERİLEN)
 
-### En Doğru Çözüm: FINAL-WORKING + Chat Memory + Google Sheets
+### En Basit ve Güvenilir Çözüm: FINAL-WORKING + Chat Memory
 
-**Dosya:** `rota-reformer-v4-MEMORY-SHEETS.json`
+**Dosya:** `rota-reformer-v4-MEMORY-ONLY.json`
 
-Bu versiyon **FINAL-WORKING'in garanti çalışan yapısına** chat memory ve Google Sheets entegrasyonu ekliyor.
+Bu versiyon **FINAL-WORKING'in garanti çalışan yapısına** sadece chat memory ekliyor. **Karmaşa yok, Google Sheets yok, garanti çalışır!**
 
-### ✅ v4 Özellikleri
+### ✅ v4-MEMORY-ONLY Özellikleri
 
 - **FINAL-WORKING Base** - Zaten çalışıyor! ✅
 - **Chat Memory (PostgreSQL)** - Konuşma geçmişini hatırlar
-- **Google Sheets Dynamic Data** - Ürün bilgileri otomatik güncellenir
-- **Dynamic System Prompt** - Sheet data'sı prompt'a otomatik eklenir
+- **Hardcoded Knowledge** - Tüm bilgi system prompt'ta (güvenilir!)
 - **"Evet" → [SALES] Akışı** - ÇALIŞIYOR ✅
+- **Basit Yapı** - Sadece 1 workflow, 1 PostgreSQL table
 
 ### 🚀 Yeni Yetenekler
 
@@ -34,17 +34,17 @@ Müşteri: "Evet"
 ---
 
 Müşteri: "Combo Cadillac özellikleri?"
-→ Google Sheets'ten data çekiliyor ✅
-→ AI detaylı bilgi veriyor ✅
+→ System prompt'taki detaylı bilgi ✅
+→ AI doğru fiyat ve specs veriyor ✅
 
 ---
 
-Google Sheets'i güncellersin
-→ 1 saat sonra otomatik yüklenir ✅
-→ AI güncel bilgiyi kullanır ✅
+Bilgi güncellemek istersen
+→ Workflow'daki system prompt'u düzenle ✅
+→ Hemen aktif olur ✅
 ```
 
-**Detaylı kurulum:** [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md)
+**Detaylı kurulum:** [V4-MEMORY-ONLY-SETUP-GUIDE.md](./V4-MEMORY-ONLY-SETUP-GUIDE.md)
 
 ---
 
@@ -52,24 +52,26 @@ Google Sheets'i güncellersin
 
 | Versiyon | Chat Memory | Google Sheets | Durum | Kullan |
 |----------|-------------|---------------|-------|--------|
-| **v4** ⭐ | ✅ | ✅ | **Production** | **ÖNERİLEN** |
+| **v4-MEMORY-ONLY** ⭐ | ✅ | ❌ (Hardcoded) | **Production** | **ÖNERİLEN** |
+| v4-MEMORY-SHEETS | ✅ | ✅ | Karmaşık | Test için |
 | COMPLETE | ✅ AI Agent | ❌ | Hatalı | ❌ |
-| WITH-MEMORY | ✅ Manuel | ❌ | Test | Test için |
 | FINAL-WORKING | ❌ | ❌ | Base | Basit prototip |
 
-### 🥇 rota-reformer-v4-MEMORY-SHEETS.json (ÖNERİLEN)
+### 🥇 rota-reformer-v4-MEMORY-ONLY.json (ÖNERİLEN)
 - ✅ FINAL-WORKING base (garanti çalışır)
 - ✅ PostgreSQL chat memory (konuşma hatırlar)
-- ✅ Google Sheets dynamic data (otomatik güncelleme)
+- ✅ Hardcoded knowledge (tüm bilgi system prompt'ta)
 - ✅ "Combo Cadillac 3 tane?" → "Evet" ÇALIŞIR
-- ✅ Ürün bilgileri Google Sheets'ten
+- ✅ Basit yapı (1 workflow, 1 table)
 - ✅ **Production-ready!**
+- ✅ **Google Sheets karmaşası YOK!**
 
-### 🥈 google-sheets-loader.json (v4 ile birlikte)
-- Google Sheets'ten data yükler
-- Her 1 saatte bir otomatik
-- PostgreSQL'e kaydeder
-- v4 workflow'u tarafından kullanılır
+### 🥈 rota-reformer-v4-MEMORY-SHEETS.json
+- FINAL-WORKING base + chat memory + Google Sheets
+- Google Sheets entegrasyonu karmaşık
+- google-sheets-loader.json ayrı workflow gerektirir
+- Hata riski daha fazla
+- Dinamik güncelleme var (ama gerek yok genelde)
 
 ### 🥉 rota-reformer-FINAL-WORKING.json
 - Chat memory YOK
@@ -91,72 +93,56 @@ Google Sheets'i güncellersin
 
 ---
 
-## 🚀 Hızlı Başlangıç (v4)
+## 🚀 Hızlı Başlangıç (v4-MEMORY-ONLY)
 
-### 1. PostgreSQL Tables Oluştur
+### 1. PostgreSQL Table Oluştur
 
 Supabase Dashboard → SQL Editor → [`setup-v4-database.sql`](./setup-v4-database.sql) çalıştır:
 
 ```sql
--- Chat History
+-- Chat History (sadece bu table gerekli!)
 CREATE TABLE IF NOT EXISTS public.chat_history (
   id SERIAL PRIMARY KEY,
   session_id TEXT NOT NULL,
-  role TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
   content TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Product Knowledge
-CREATE TABLE IF NOT EXISTS public.product_knowledge (
-  id SERIAL PRIMARY KEY,
-  type TEXT NOT NULL,
-  name TEXT NOT NULL,
-  content TEXT NOT NULL,
-  metadata JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+CREATE INDEX idx_chat_history_session
+ON public.chat_history(session_id, created_at);
 ```
 
-### 2. Google Sheets Hazırla
+**Sadece 1 table! Google Sheets YOK!** ✅
 
-**Sheet:** https://docs.google.com/spreadsheets/d/1cCXNnB7t8m32LQvhrcPxgxM4lHE-NfzlCtISbr7_EyQ/edit
-
-1. Share → "Anyone with the link" → Viewer
-2. Tablar:
-   - `Urun Bilgi` - Ürün detayları
-   - `S.S.S` - Sık Sorulan Sorular
-
-### 3. n8n'e Import Et
+### 2. n8n'e Import Et
 
 ```bash
 git clone https://github.com/tascigurur/tascigurur.git
 cd tascigurur
 ```
 
-**A) Ana Workflow:**
-- n8n → Import → **`rota-reformer-v4-MEMORY-SHEETS.json`**
+**Tek Workflow:**
+- n8n → Import → **`rota-reformer-v4-MEMORY-ONLY.json`**
 - Credentials: Postgres, OpenAI API, Header Auth
 - Active et
+- Webhook URL kopyala → Evolution API'ye set et
 
-**B) Data Loader:**
-- n8n → Import → **`google-sheets-loader.json`**
-- Credentials: Google Sheets, Postgres
-- Active et
-- İlk yükleme için manuel çalıştır
+**HEPSI BU!** Başka workflow yok, Google Sheets yok! ✅
 
-### 4. Test Et!
+### 3. Test Et!
 
 ```
 "Combo Cadillac 3 tane ne kadar?"
-→ "186.000 TL. Koordinatörümüz arasın mı?"
+→ "186.000 TL + KDV. Koordinatörümüz arasın mı?"
 
 "Evet"
 → Chat Memory hatırlıyor ✅
 → Koordinatöre mesaj gidiyor ✅
 
 "Combo Cadillac özellikleri?"
-→ Google Sheets'ten bilgi çekiliyor ✅
+→ System prompt'taki bilgi ✅
+→ Doğru fiyat ve specs veriyor ✅
 ```
 
 ---
@@ -164,7 +150,8 @@ cd tascigurur
 ## 📚 Dokümantasyon
 
 ### Ana Rehberler
-- **⭐ V4 GUIDE:** [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md) - **TAVSİYE EDİLEN**
+- **⭐ V4-MEMORY-ONLY:** [V4-MEMORY-ONLY-SETUP-GUIDE.md](./V4-MEMORY-ONLY-SETUP-GUIDE.md) - **TAVSİYE EDİLEN**
+- **V4 with Sheets:** [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md) - Google Sheets ile (karmaşık)
 - **Complete Guide:** [COMPLETE-SETUP-GUIDE.md](./COMPLETE-SETUP-GUIDE.md)
 - **Memory Guide:** [MEMORY-SETUP-GUIDE.md](./MEMORY-SETUP-GUIDE.md)
 
@@ -256,33 +243,28 @@ Detaylı troubleshooting: [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md)
 
 ---
 
-## 🎯 MİMARİ (v4)
+## 🎯 MİMARİ (v4-MEMORY-ONLY)
 
 ```
-Webhook
+Webhook (WhatsApp message)
   ↓
-  ├─ Load Chat History (Postgres)
-  └─ Load Product Knowledge (Postgres - Google Sheets data)
+Load Chat History (Postgres) ← Son 20 mesaj
   ↓
-Build Messages (dynamic system prompt)
+Build Messages (Code)
+  ├─ System prompt (TÜM bilgi burada!)
+  ├─ Chat history ekle
+  └─ User message ekle
   ↓
 Save User Message → OpenAI API → Save Assistant
   ↓
-Parse Response
+Parse Response (Extract TAGs)
   ↓
 IF Image / Catalog / Pricelist / Sales
   ↓
 Send HTTP Request (Evolution API)
 ```
 
-**Ayrı Workflow: Google Sheets Loader**
-```
-Schedule (Every 1 Hour)
-  ↓
-Read Sheets (Urun Bilgi + S.S.S)
-  ↓
-Save to product_knowledge table
-```
+**Tek workflow! Başka workflow yok!** ✅
 
 ---
 
@@ -296,12 +278,13 @@ MIT License
 
 ---
 
-## 🎉 v4 Avantajları
+## 🎉 v4-MEMORY-ONLY Avantajları
 
 ✅ **Garanti çalışır** - FINAL-WORKING base
 ✅ **Chat memory** - Konuşmaları hatırlar
-✅ **Dinamik data** - Google Sheets → otomatik
-✅ **Kolay yönetim** - Sheet güncelle, 1 saat bekle
+✅ **Basit yapı** - 1 workflow, 1 table, 3 credential
+✅ **Kolay yönetim** - System prompt düzenle, hemen aktif
 ✅ **Production-ready** - Tüm özellikler aktif
+✅ **NO karmaşa** - Google Sheets yok, AI Agent yok
 
-**Bu workflow GERÇEKTEN çalışır ve dinamiktir!** 🚀
+**Bu workflow GERÇEKTEN çalışır ve basittir!** 🚀
