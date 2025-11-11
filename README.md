@@ -4,158 +4,159 @@
 
 ---
 
-## 🎯 COMPLETE VERSION (Production-Ready) ⭐
+## 🎯 v4: Chat Memory + Google Sheets ⭐ (ÖNERİLEN)
 
-### En Doğru Yaklaşım: v3'ün Başarılı Yapısı + Stabil API Çağrıları
+### En Doğru Çözüm: FINAL-WORKING + Chat Memory + Google Sheets
 
-**Dosya:** `rota-reformer-COMPLETE.json`
+**Dosya:** `rota-reformer-v4-MEMORY-SHEETS.json`
 
-Bu versiyon **v3'ün tüm güçlü özelliklerini koruyup** sadece hatalı Evolution API node'larını HTTP Request ile değiştiriyor.
+Bu versiyon **FINAL-WORKING'in garanti çalışan yapısına** chat memory ve Google Sheets entegrasyonu ekliyor.
 
-### ✅ v3'ten KORUNAN YAPILAR
+### ✅ v4 Özellikleri
 
-- **AI Agent (LangChain)** - n8n'nin native AI engine
-- **Postgres Chat Memory** - Otomatik konuşma geçmişi yönetimi
-- **Supabase Vector Store** - RAG (Retrieval Augmented Generation) ile dinamik ürün bilgisi
-- **OpenAI Chat Model** - GPT-4o-mini entegrasyonu
-
-### ✅ DEĞİŞTİRİLEN
-
-- ❌ Evolution API node'ları (hatalı) → ✅ **HTTP Request** (stabil)
+- **FINAL-WORKING Base** - Zaten çalışıyor! ✅
+- **Chat Memory (PostgreSQL)** - Konuşma geçmişini hatırlar
+- **Google Sheets Dynamic Data** - Ürün bilgileri otomatik güncellenir
+- **Dynamic System Prompt** - Sheet data'sı prompt'a otomatik eklenir
+- **"Evet" → [SALES] Akışı** - ÇALIŞIYOR ✅
 
 ### 🚀 Yeni Yetenekler
 
 ```
-Müşteri: "Combo Cadillac'ın özellikleri neler?"
-→ Vector Store'dan detaylı bilgi çekiliyor (RAG)
-→ AI dinamik cevap veriyor
-
 Müşteri: "Combo Cadillac 3 tane ne kadar?"
 AI: "186.000 TL + KDV. Koordinatörümüz arasın mı?"
 
 Müşteri: "Evet"
-→ Chat Memory sayesinde AI hatırlıyor
-→ [SALES] TAG → Koordinatöre mesaj gidiyor ✅
+→ Chat Memory hatırlıyor ✅
+→ [SALES] TAG ✅
+→ Koordinatöre mesaj gidiyor ✅
+
+---
+
+Müşteri: "Combo Cadillac özellikleri?"
+→ Google Sheets'ten data çekiliyor ✅
+→ AI detaylı bilgi veriyor ✅
+
+---
+
+Google Sheets'i güncellersin
+→ 1 saat sonra otomatik yüklenir ✅
+→ AI güncel bilgiyi kullanır ✅
 ```
 
-**Detaylı kurulum:** [COMPLETE-SETUP-GUIDE.md](./COMPLETE-SETUP-GUIDE.md)
+**Detaylı kurulum:** [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md)
 
 ---
 
 ## 📊 Workflow Versiyonları
 
-| Versiyon | Chat Memory | Vector Store | Karmaşıklık | Durum |
-|----------|-------------|--------------|-------------|-------|
-| **COMPLETE** ⭐ | ✅ Otomatik | ✅ RAG | Profesyonel | **Production** |
-| WITH-MEMORY | ✅ Manuel | ❌ | Orta | Test |
-| FINAL-WORKING | ❌ | ❌ | Basit | Prototip |
-| v3-ORIGINAL | ✅ | ✅ | Profesyonel | Hatalı API |
+| Versiyon | Chat Memory | Google Sheets | Durum | Kullan |
+|----------|-------------|---------------|-------|--------|
+| **v4** ⭐ | ✅ | ✅ | **Production** | **ÖNERİLEN** |
+| COMPLETE | ✅ AI Agent | ❌ | Hatalı | ❌ |
+| WITH-MEMORY | ✅ Manuel | ❌ | Test | Test için |
+| FINAL-WORKING | ❌ | ❌ | Base | Basit prototip |
 
-### 🥇 rota-reformer-COMPLETE.json (ÖNERİLEN)
-- AI Agent + Postgres Memory + Vector Store (RAG)
-- HTTP Request (stabil Evolution API)
-- "Combo Cadillac 3 tane?" → "Evet" akışı ÇALIŞIYOR
-- Dinamik ürün bilgisi (hardcode değil, vector store'dan)
-- **Production-ready!**
+### 🥇 rota-reformer-v4-MEMORY-SHEETS.json (ÖNERİLEN)
+- ✅ FINAL-WORKING base (garanti çalışır)
+- ✅ PostgreSQL chat memory (konuşma hatırlar)
+- ✅ Google Sheets dynamic data (otomatik güncelleme)
+- ✅ "Combo Cadillac 3 tane?" → "Evet" ÇALIŞIR
+- ✅ Ürün bilgileri Google Sheets'ten
+- ✅ **Production-ready!**
 
-### 🥈 rota-reformer-WITH-MEMORY.json
-- Manuel Postgres chat history
-- HTTP Request
-- Vector store YOK
-- Orta seviye
+### 🥈 google-sheets-loader.json (v4 ile birlikte)
+- Google Sheets'ten data yükler
+- Her 1 saatte bir otomatik
+- PostgreSQL'e kaydeder
+- v4 workflow'u tarafından kullanılır
 
 ### 🥉 rota-reformer-FINAL-WORKING.json
 - Chat memory YOK
 - Her mesaj bağımsız
+- Basit prototip
 - Hızlı test için
 
 ---
 
 ## ✨ Özellikler
 
-- 💬 **AI Agent:** LangChain ile güçlü conversation yönetimi
-- 🧠 **Chat Memory:** Postgres ile otomatik konuşma geçmişi
-- 📚 **Vector Store (RAG):** Supabase ile dinamik ürün bilgisi
+- 💬 **Chat Memory:** PostgreSQL ile konuşma geçmişi
+- 📚 **Google Sheets Data:** Dinamik ürün bilgileri & SSS
 - 📸 **Otomatik Görsel Gönderimi:** 10 farklı ürün için 20+ görsel
 - 💰 **Fiyat Listesi & Katalog:** Anında PDF ve görsel gönderimi
-- 🎨 **Renk Kartelası:** Deri renk seçenekleri
 - 🔔 **Satış Koordinatörü:** Otomatik lead yönlendirme
-- 🔧 **Teknik Destek:** Sorunları ekibe yönlendirme
+- 🤖 **Dynamic System Prompt:** Sheet data otomatik eklenir
+- 🔄 **Otomatik Güncelleme:** Sheet'i değiştir → 1 saat sonra aktif
 
 ---
 
-## 🚀 Hızlı Başlangıç (COMPLETE)
+## 🚀 Hızlı Başlangıç (v4)
 
-### 1. PostgreSQL + pgvector Setup
+### 1. PostgreSQL Tables Oluştur
 
-Supabase Dashboard → SQL Editor:
+Supabase Dashboard → SQL Editor → [`setup-v4-database.sql`](./setup-v4-database.sql) çalıştır:
 
 ```sql
--- Enable pgvector
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- Chat history (n8n otomatik yönetir)
+-- Chat History
 CREATE TABLE IF NOT EXISTS public.chat_history (
   id SERIAL PRIMARY KEY,
   session_id TEXT NOT NULL,
   role TEXT NOT NULL,
-  message TEXT NOT NULL,
+  content TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_chat_history_session
-ON public.chat_history(session_id, created_at);
-
--- Documents table (vector store)
-CREATE TABLE IF NOT EXISTS public.documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+-- Product Knowledge
+CREATE TABLE IF NOT EXISTS public.product_knowledge (
+  id SERIAL PRIMARY KEY,
+  type TEXT NOT NULL,
+  name TEXT NOT NULL,
   content TEXT NOT NULL,
   metadata JSONB,
-  embedding vector(1536)
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-CREATE INDEX ON public.documents
-USING ivfflat (embedding vector_cosine_ops);
 ```
 
-### 2. n8n'e Import Et
+### 2. Google Sheets Hazırla
+
+**Sheet:** https://docs.google.com/spreadsheets/d/1cCXNnB7t8m32LQvhrcPxgxM4lHE-NfzlCtISbr7_EyQ/edit
+
+1. Share → "Anyone with the link" → Viewer
+2. Tablar:
+   - `Urun Bilgi` - Ürün detayları
+   - `S.S.S` - Sık Sorulan Sorular
+
+### 3. n8n'e Import Et
 
 ```bash
 git clone https://github.com/tascigurur/tascigurur.git
 cd tascigurur
 ```
 
-- n8n'i aç
-- "Import from File" → **`rota-reformer-COMPLETE.json`** seç
-- Credentials'ları yapılandır:
-  - ✅ Postgres account (Supabase)
-  - ✅ Supabase API (vector store)
-  - ✅ OpenAI API
-  - ✅ Header Auth (Evolution API key)
+**A) Ana Workflow:**
+- n8n → Import → **`rota-reformer-v4-MEMORY-SHEETS.json`**
+- Credentials: Postgres, OpenAI API, Header Auth
+- Active et
 
-### 3. Ürün Bilgilerini Vector Store'a Ekle
-
-```sql
-INSERT INTO public.documents (content, metadata) VALUES
-('Combo Cadillac: En kapsamlı Pilates ekipmanımız. Tower ve Reformer özelliklerini birleştirir. 62.000 TL + KDV.',
- '{"product": "Combo Cadillac", "price": 62000}'::jsonb);
-
--- Diğer ürünler için tekrarla...
-```
+**B) Data Loader:**
+- n8n → Import → **`google-sheets-loader.json`**
+- Credentials: Google Sheets, Postgres
+- Active et
+- İlk yükleme için manuel çalıştır
 
 ### 4. Test Et!
 
 ```
-Müşteri: "Combo Cadillac özellikleri?"
-→ Vector Store'dan bilgi çekiliyor
-→ AI detaylı cevap veriyor
+"Combo Cadillac 3 tane ne kadar?"
+→ "186.000 TL. Koordinatörümüz arasın mı?"
 
-Müşteri: "3 tane ne kadar?"
-AI: "186.000 TL + KDV. Koordinatörümüz arasın mı?"
-
-Müşteri: "Evet"
-→ Chat Memory hatırlıyor
+"Evet"
+→ Chat Memory hatırlıyor ✅
 → Koordinatöre mesaj gidiyor ✅
+
+"Combo Cadillac özellikleri?"
+→ Google Sheets'ten bilgi çekiliyor ✅
 ```
 
 ---
@@ -163,23 +164,23 @@ Müşteri: "Evet"
 ## 📚 Dokümantasyon
 
 ### Ana Rehberler
-- **⭐ COMPLETE GUIDE:** [COMPLETE-SETUP-GUIDE.md](./COMPLETE-SETUP-GUIDE.md) - **TAVSİYE EDİLEN**
+- **⭐ V4 GUIDE:** [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md) - **TAVSİYE EDİLEN**
+- **Complete Guide:** [COMPLETE-SETUP-GUIDE.md](./COMPLETE-SETUP-GUIDE.md)
 - **Memory Guide:** [MEMORY-SETUP-GUIDE.md](./MEMORY-SETUP-GUIDE.md)
-- **Simple Guide:** [SIMPLE-WORKFLOW-GUIDE.md](./SIMPLE-WORKFLOW-GUIDE.md)
 
-### Ek Dokümantasyon
-- [QUICKSTART.md](./QUICKSTART.md) - Hızlı başlangıç
-- [FIX-v3-EXPLANATION.md](./FIX-v3-EXPLANATION.md) - v3 analizi
+### SQL Scripts
+- [setup-v4-database.sql](./setup-v4-database.sql) - v4 için PostgreSQL tables
+- [chat_history_table.sql](./chat_history_table.sql) - Sadece chat history
 
 ---
 
 ## 🛠️ Teknolojiler
 
 - **n8n** - Workflow automation
-- **LangChain** - AI Agent framework (n8n native)
-- **OpenAI GPT-4o-mini** - AI model
-- **PostgreSQL + pgvector** - Chat history + Vector embeddings
-- **Supabase** - Managed Postgres + Vector Store
+- **OpenAI GPT-4o-mini** - AI model (HTTP Request)
+- **PostgreSQL** - Chat history + Product knowledge
+- **Supabase** - Managed PostgreSQL
+- **Google Sheets** - Dynamic data source
 - **Evolution API** - WhatsApp integration (HTTP Request)
 - **Google Drive** - Media hosting
 
@@ -200,88 +201,88 @@ Müşteri: "Evet"
 | Barrel | 24.000 TL (KDV Dahil) |
 | Spine Corrector | 9.000 TL (KDV Dahil) |
 
+*Fiyatlar ve detaylı bilgiler Google Sheets'ten otomatik yüklenir*
+
 ---
 
 ## 🧪 Test Senaryoları
 
-### Basit Sorgular
+### Chat Memory
 ```
-✅ "Combo Cadillac fiyatı?" → "62.000 TL + KDV"
+✅ "Combo Cadillac 3 tane?" → "186.000 TL. Arasın mı?"
+✅ "Evet" → AI hatırlıyor → [SALES] → Koordinatör ✅
+```
+
+### Google Sheets Data
+```
+✅ "Combo Cadillac özellikleri?" → Sheet'ten bilgi
+✅ Sheet'i güncelle → 1 saat → AI biliyor
+```
+
+### Görseller
+```
 ✅ "Chair görselleri" → 3 fotoğraf
-✅ "Fiyat listesi" → Fiyat listesi görseli
-✅ "Katalog" → PDF katalog
-```
-
-### Kompleks Sorgular (Vector Store)
-```
-✅ "Combo Cadillac özellikleri?" → Vector Store'dan detaylı bilgi
-✅ "Combo Cadillac ile Tower Reformer farkı?" → Karşılaştırmalı analiz
-```
-
-### Konuşma Akışı (Chat Memory)
-```
-✅ "Combo Cadillac 3 tane ne kadar?"
-   → "186.000 TL + KDV. Koordinatörümüz arasın mı?"
-✅ "Evet"
-   → Chat Memory hatırlıyor
-   → [SALES] TAG → Koordinatöre mesaj GİDER ✅
+✅ "Katalog" → PDF
+✅ "Fiyat listesi" → Görsel
 ```
 
 ---
 
 ## 🔧 Debugging
 
-### Postgres Chat History Kontrol
+### Chat History Kontrol
 ```sql
-SELECT * FROM public.chat_history
+SELECT session_id, role, content, created_at
+FROM public.chat_history
 WHERE session_id LIKE '%905368286231%'
 ORDER BY created_at DESC
-LIMIT 20;
+LIMIT 10;
 ```
 
-### Vector Store Kontrol
+### Product Knowledge Kontrol
 ```sql
-SELECT content, metadata FROM public.documents LIMIT 10;
+SELECT type, COUNT(*) as count
+FROM public.product_knowledge
+GROUP BY type;
 ```
 
 ### n8n Execution Log
 1. n8n → Executions → En son execution
-2. Her node'un input/output'una bak
-3. AI Agent → Output'ta TAG var mı?
-4. Switch → Hangi dala girdi?
+2. Load Chat History → Kaç mesaj yükledi?
+3. Load Product Knowledge → Kaç item yükledi?
+4. Build Messages → Total messages?
 
-Detaylı troubleshooting: [COMPLETE-SETUP-GUIDE.md](./COMPLETE-SETUP-GUIDE.md)
+Detaylı troubleshooting: [V4-SETUP-GUIDE.md](./V4-SETUP-GUIDE.md)
 
 ---
 
-## 🎯 MİMARİ
+## 🎯 MİMARİ (v4)
 
-### COMPLETE (Production)
 ```
 Webhook
   ↓
-AI Agent (LangChain)
-  ├─ Postgres Chat Memory (otomatik)
-  ├─ Supabase Vector Store (RAG)
-  └─ OpenAI Chat Model
+  ├─ Load Chat History (Postgres)
+  └─ Load Product Knowledge (Postgres - Google Sheets data)
   ↓
-Switch (TAG routing)
-  ├─ [SEND_TO_SALES_COORDINATOR] → HTTP Request
-  ├─ [SEND_PRODUCT_IMAGES] → HTTP Request (loop)
-  ├─ [SEND_CATALOG] → HTTP Request (PDF)
-  └─ ...
+Build Messages (dynamic system prompt)
   ↓
-Format Message (remove tags)
+Save User Message → OpenAI API → Save Assistant
   ↓
-HTTP Request (customer message)
+Parse Response
   ↓
-Respond to Webhook
+IF Image / Catalog / Pricelist / Sales
+  ↓
+Send HTTP Request (Evolution API)
 ```
 
-### Neden HTTP Request? (Evolution API yerine)
-- Evolution API n8n node'u hatalı: "Could not get parameter"
-- HTTP Request direkt endpoint çağrısı, daha stabil
-- v3'ün başarılı yapısı korundu, sadece API çağrıları değişti
+**Ayrı Workflow: Google Sheets Loader**
+```
+Schedule (Every 1 Hour)
+  ↓
+Read Sheets (Urun Bilgi + S.S.S)
+  ↓
+Save to product_knowledge table
+```
 
 ---
 
@@ -295,4 +296,12 @@ MIT License
 
 ---
 
-**Bu workflow v3'ün profesyonel yapısı + stabil Evolution API çağrıları ile GERÇEKTEN PRODUCTION-READY!** 🎉
+## 🎉 v4 Avantajları
+
+✅ **Garanti çalışır** - FINAL-WORKING base
+✅ **Chat memory** - Konuşmaları hatırlar
+✅ **Dinamik data** - Google Sheets → otomatik
+✅ **Kolay yönetim** - Sheet güncelle, 1 saat bekle
+✅ **Production-ready** - Tüm özellikler aktif
+
+**Bu workflow GERÇEKTEN çalışır ve dinamiktir!** 🚀

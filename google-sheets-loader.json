@@ -1,0 +1,270 @@
+{
+  "name": "Google Sheets Data Loader - Product Knowledge",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule (Every 1 Hour)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cCXNnB7t8m32LQvhrcPxgxM4lHE-NfzlCtISbr7_EyQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Urun Bilgi",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "read-products",
+      "name": "Read Products (Urun Bilgi)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PLACEHOLDER",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cCXNnB7t8m32LQvhrcPxgxM4lHE-NfzlCtISbr7_EyQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "S.S.S",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "read-faq",
+      "name": "Read FAQ (S.S.S)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        500
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PLACEHOLDER",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format Products data\nconst products = $input.all();\nconst formattedProducts = [];\n\nfor (const item of products) {\n  const row = item.json;\n  \n  // Skip empty rows\n  if (!row.Ürün) continue;\n  \n  formattedProducts.push({\n    json: {\n      type: 'product',\n      name: row['Ürün'] || '',\n      description: row['Açıklama'] || '',\n      features: row['Özellikler'] || '',\n      price: row['Fiyat'] || '',\n      delivery: row['Teslimat'] || '',\n      warranty: row['Garanti'] || '',\n      content: `${row['Ürün'] || ''}: ${row['Açıklama'] || ''}. Özellikler: ${row['Özellikler'] || ''}. Fiyat: ${row['Fiyat'] || ''}. ${row['Teslimat'] || ''}. ${row['Garanti'] || ''}`\n    }\n  });\n}\n\nconsole.log(`Formatted ${formattedProducts.length} products`);\nreturn formattedProducts;"
+      },
+      "id": "format-products",
+      "name": "Format Products",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format FAQ data\nconst faqs = $input.all();\nconst formattedFaqs = [];\n\nfor (const item of faqs) {\n  const row = item.json;\n  \n  // Skip empty rows\n  if (!row.Soru) continue;\n  \n  formattedFaqs.push({\n    json: {\n      type: 'faq',\n      question: row['Soru'] || '',\n      answer: row['Cevap'] || '',\n      category: row['Kategori'] || 'Genel',\n      content: `S: ${row['Soru'] || ''}\\nC: ${row['Cevap'] || ''}`\n    }\n  });\n}\n\nconsole.log(`Formatted ${formattedFaqs.length} FAQs`);\nreturn formattedFaqs;"
+      },
+      "id": "format-faq",
+      "name": "Format FAQ",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        500
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "merge-data",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        840,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM product_knowledge WHERE TRUE",
+        "options": {}
+      },
+      "id": "clear-old-data",
+      "name": "Clear Old Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1040,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "gLNF0iMifzK0leX1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "product_knowledge",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "type": "={{ $json.type }}",
+            "name": "={{ $json.name || $json.question }}",
+            "content": "={{ $json.content }}",
+            "metadata": "={{ JSON.stringify($json) }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "save-to-db",
+      "name": "Save to Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1240,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "gLNF0iMifzK0leX1",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (Every 1 Hour)": {
+      "main": [
+        [
+          {
+            "node": "Read Products (Urun Bilgi)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read FAQ (S.S.S)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Products (Urun Bilgi)": {
+      "main": [
+        [
+          {
+            "node": "Format Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read FAQ (S.S.S)": {
+      "main": [
+        [
+          {
+            "node": "Format FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Products": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format FAQ": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Clear Old Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Old Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "sheets-loader-v1",
+  "tags": []
+}
