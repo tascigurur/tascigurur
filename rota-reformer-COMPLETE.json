@@ -415,7 +415,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: '905539644020', text: `🔔 YENI SATIS TALEBI\\n\\nMusteri: ${$json.recipient}\\n\\nMesaj:\\n${$json.customer_message || $json.messageText}\\n\\nLutfen musteriyi arayin.` } }}",
+        "jsonBody": "={{ { number: $json.recipient, text: $json.message } }}",
         "options": {}
       },
       "id": "send-coord-sales-node",
@@ -450,7 +450,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: '905539644020', text: `🔔 YENI SATIS TALEBI\\n\\nMusteri: ${$json.recipient}\\n\\nMesaj:\\n${$json.customer_message || $json.messageText}\\n\\nLutfen musteriyi arayin.` } }}",
+        "jsonBody": "={{ { number: $json.recipient, text: $json.message } }}",
         "options": {}
       },
       "id": "send-coord-tech-node",
@@ -485,7 +485,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: $json.recipient, mediatype: 'image', media: $json.image_url, caption: $json.caption || '' } }}",
+        "jsonBody": "={{ { number: $json.recipientNumber, mediatype: \"image\", media: $json.mediaUrl, caption: $json.caption || \"\" } }}",
         "options": {}
       },
       "id": "send-images-node",
@@ -520,7 +520,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: $json.recipient, mediatype: 'image', media: $json.color_url, caption: 'Deri Renk Kartelamız' } }}",
+        "jsonBody": "={{ { number: $json.recipientNumber, mediatype: \"image\", media: $json.mediaUrl, caption: $json.caption || \"Deri Renk Kartelası\" } }}",
         "options": {}
       },
       "id": "send-color-node",
@@ -555,7 +555,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: $json.recipient, mediatype: 'image', media: $json.pricelist_url || 'https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0', caption: '2025 Fiyat Listesi' } }}",
+        "jsonBody": "={{ { number: $json.recipientNumber, mediatype: \"image\", media: $json.mediaUrl, caption: $json.caption || \"2025 Fiyat Listesi\" } }}",
         "options": {}
       },
       "id": "send-pricelist-node",
@@ -590,7 +590,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: $json.recipient, mediatype: 'document', media: $json.catalog_url || 'https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN', fileName: 'Rota-Reformer-Katalog-2025.pdf', caption: 'Rota Reformer Katalog 2025' } }}",
+        "jsonBody": "={{ { number: $json.recipientNumber, mediatype: \"document\", media: $json.mediaUrl, fileName: \"Rota-Reformer-Katalog-2025.pdf\", caption: $json.caption || \"Rota Reformer Katalog 2025\" } }}",
         "options": {}
       },
       "id": "send-catalog-node",
