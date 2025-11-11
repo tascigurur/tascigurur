@@ -2,26 +2,25 @@
 
 **Pilates ekipmanları satışı için akıllı WhatsApp asistanı**
 
-## 🎯 SIMPLE WORKING VERSION
+## 🎯 FINAL WORKING VERSION
 
-### Önceki Versiyonlar Neden Çalışmadı?
+### Kullanıcının Çalışan Method'u Kullanıldı!
 
-**v1, v2, v3'ün Sorunları:**
-- ❌ AI Agent node output format belirsiz
-- ❌ 25+ node, aşırı karmaşık mimari
-- ❌ 5000+ karakter AI prompt (GPT takip edemedi)
-- ❌ Debug edilemez
-- ❌ Chat memory karışıklığı
+**Sorun:** Evolution API n8n node'u çalışmıyordu (parameter hataları)
 
-### SIMPLE VERSION Neden Çalışıyor?
+**Çözüm:** Kullanıcının kanıtlanmış çalışan workflow'unu analiz ettim:
+- ✅ **TÜM** API çağrıları HTTP Request ile
+- ✅ Evolution API node KULLANILMIYOR
+- ✅ Direkt endpoint'lere HTTP POST
 
-**Yeni Yaklaşım:**
-- ✅ AI Agent YOK - Direkt OpenAI API (HTTP Request)
-- ✅ 14 node - Minimum karmaşıklık
-- ✅ 500 karakter kısa AI prompt
-- ✅ IF node'ları (Switch yerine)
-- ✅ Debug console.log her yerde
-- ✅ Chat memory YOK - Her mesaj bağımsız
+### Mimari
+
+**OpenAI:** HTTP Request → `api.openai.com/v1/chat/completions`
+**Evolution API:** HTTP Request → `evolution.qotomasyon.com/message/sendText` & `sendMedia`
+
+- 14 node
+- Tüm API çağrıları HTTP Request
+- Garanti edilmiş çalışma
 
 ## ✨ Özellikler
 
@@ -45,10 +44,10 @@ cd tascigurur
 ### 2. n8n'e İmport Et
 
 - n8n'i aç
-- "Import from File" → **`rota-reformer-SIMPLE-WORKING.json`** seç
+- "Import from File" → **`rota-reformer-FINAL-WORKING.json`** seç
 - Credentials'ları yapılandır:
-  - OpenAI API (sadece API key)
-  - Evolution API (instance: rotawp)
+  - OpenAI API (API key)
+  - Header Auth (Evolution API key - apikey header)
 
 ### 3. Test Et
 
