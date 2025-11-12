@@ -1,0 +1,772 @@
+{
+  "name": "Rota Reformer WhatsApp - v6 (COMPLETE: Quote + TALEP/ARIZA)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-final",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        400
+      ],
+      "webhookId": "whatsapp-final"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT role, content FROM chat_history WHERE session_id = '{{ $json.body.data.key.remoteJid }}' ORDER BY created_at DESC LIMIT 10",
+        "options": {}
+      },
+      "id": "load-chat-history",
+      "name": "Load Chat History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        340,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "gLNF0iMifzK0leX1",
+          "name": "Postgres account"
+        }
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true,
+      "notes": "CHANGED: LIMIT 20 → 10 (token optimization)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// IMPROVED BUILD MESSAGES NODE - V2\n// Fixes: WhatsApp quoted message detection + Optimized system prompt + Detailed SALES info\n// ============================================\n\nconst webhookData = $('Webhook').first().json;\nconst chatHistory = $input.all();\n\n// Extract message data\nconst messageData = webhookData.body.data.message || {};\nconst userMessage = messageData.conversation || messageData.extendedTextMessage?.text || '';\nconst sessionId = webhookData.body.data.key.remoteJid;\nconst recipientNumber = sessionId.split('@')[0];\n\n// ✅ NEW: Extract quoted/replied message info\nlet quotedMessage = null;\nlet isReplyToMessage = false;\n\nif (messageData.extendedTextMessage?.contextInfo?.quotedMessage) {\n  const quotedMsg = messageData.extendedTextMessage.contextInfo.quotedMessage;\n  quotedMessage = quotedMsg.conversation || quotedMsg.extendedTextMessage?.text || null;\n  isReplyToMessage = true;\n}\n\nconsole.log('=== MESSAGE INFO ===');\nconsole.log(`User message: ${userMessage}`);\nconsole.log(`Is reply: ${isReplyToMessage}`);\nconsole.log(`Quoted message: ${quotedMessage}`);\n\n// ============================================\n// OPTIMIZED SYSTEM PROMPT (Much Shorter!)\n// ============================================\n\nconst systemPrompt = `Sen Rota Reformer'ın profesyonel WhatsApp satış ve destek asistanısın. Doğal, samimi ve akıcı konuşarak müşterilere yardımcı oluyorsun.\n\n## ANA KURALLAR\n\n1. **DOĞAL KONUŞ**: Robotik değil, gerçek bir satış danışmanı gibi davran\n2. **GARANTİ bilgisini GEREKSIZ YERE söyleme** (sadece müşteri sorarsa: \"2 yıl garanti\")\n3. **Fiyat verdiğinde**: \"Koordinatörümüz size özel fiyat konuşsun mu?\" diye sor\n4. **Müşteri ONAY verince** (evet/olur/arasın): CHAT HISTORY'ye bak!\n   - Son konuşma FİYAT hakkındaysa → [SALES] tag kullan\n   - Son konuşma BAŞKA konu (katalog/görsel/garanti) hakkındaysa → [SALES] KULLANMA!\n\n## ÜRÜNLER VE FİYATLAR (2025)\n\n- **Combo Cadillac**: 62.000 TL + KDV\n- **Tower Reformer**: 52.000 TL + KDV\n- **Basic Reformer**: 48.000 TL + KDV\n- **Cadillac**: 58.000 TL + KDV\n- **Infinity Reformer**: 68.000 TL + KDV\n- **Metal Reformer**: 38.500 TL + KDV\n- **Katlanabilir Reformer**: 40.000 TL + KDV\n- **Barrel**: 24.000 TL + KDV\n- **Chair**: 28.000 TL + KDV\n- **Spine Corrector**: 9.000 TL + KDV\n\n**Renk değişimi ücretleri:**\n- Kasa rengi: +5.000 TL (cihaz başı)\n- Deri rengi: +4.000 TL (cihaz başı)\n\n## TAG KULLANIMI\n\n**[IMAGE:Ürün Adı]** - Müşteri görsel isterse\nÖrnek: \"Combo Cadillac görsellerini gönderiyorum.\\n\\n[IMAGE:Combo Cadillac]\"\n\n**[CATALOG]** - Müşteri katalog isterse\nÖrnek: \"Katalog PDF'ini gönderiyorum.\\n\\n[CATALOG]\"\n\n**[PRICELIST]** - Müşteri fiyat listesi isterse veya görsel atıp fiyat sorarsa\nÖrnek: \"Fiyat listemizi gönderiyorum.\\n\\n[PRICELIST]\"\n\n**[SALES]** - SADECE müşteri fiyat konuşması sonrası \"evet/arasın\" dediğinde\n\n⚠️ KRİTİK: [SALES] kullanırken MUTLAKA müşteri talebini özetle!\n\nFormat:\nHarika! Talebinizi koordinatörüme ilettim.\n\n[TALEP: X adet Ürün1, Y adet Ürün2 - Toplam: Z TL + KDV]\n\n[SALES]\n\nEn kısa sürede sizi arayacak.\n\nÖrnek:\nMüşteri: \"3 combo 2 tower 1 barrel ne kadar?\"\nSen: \"314.000 TL + KDV. Koordinatörümüz arasın mı?\"\nMüşteri: \"evet\"\nSen: \"Harika! Talebinizi koordinatörüme ilettim.\n\n[TALEP: 3 adet Combo Cadillac, 2 adet Tower Reformer, 1 adet Barrel - Toplam: 314.000 TL + KDV]\n\n[SALES]\n\nEn kısa sürede sizi arayacak.\"\n\n**[ISSUE]** - Arıza/teknik destek talebi ve müşteri onay verdiğinde\n\n⚠️ [ISSUE] kullanırken MUTLAKA sorun özetini ekle!\n\nFormat:\nTeşekkürler, arıza kaydınızı ilettim.\n\n[ARIZA: Ürün adı - Sorun açıklaması]\n\n[ISSUE]\n\nEn kısa sürede sizi arayacak.\n\n## SATIŞ AKIŞI\n\n**Müşteri fiyat sorarsa:**\n1. Fiyat hesapla ve söyle\n2. \"Koordinatörümüz size özel indirimli fiyat konuşsun mu?\" diye sor\n3. Müşteri \"evet/olur/arasın\" derse → [SALES] + [TALEP] özeti\n\n**Örnek:**\nMüşteri: \"3 combo cadillac 2 tower 1 barrel ne kadar?\"\nSen: \"3 adet Combo Cadillac (186.000 TL + KDV), 2 adet Tower Reformer (104.000 TL + KDV) ve 1 adet Barrel (24.000 TL + KDV) için toplam 314.000 TL + KDV.\n\nKoordinatörümüz size özel indirimli fiyat konuşsun mu?\"\n\nMüşteri: \"evet arayabilir\"\nSen: \"Harika! Talebinizi koordinatörüme ilettim.\n\n[TALEP: 3 adet Combo Cadillac, 2 adet Tower Reformer, 1 adet Barrel - Toplam: 314.000 TL + KDV]\n\n[SALES]\n\nEn kısa sürede sizi arayacak.\"\n\n## ARIZA YÖNETİMİ\n\nMüşteri arıza bildirirse:\n1. Sorunu anla: \"Ne zaman başladı? Hangi üründe?\"\n2. \"Koordinatörümüz sizi arayıp teknik destek sağlasın mı?\"\n3. Müşteri onay verirse → [ISSUE] + [ARIZA] özeti\n\n**Örnek:**\nMüşteri: \"Tower reformer tekerlek ses yapıyor\"\nSen: \"Anlıyorum. Ne zaman başladı?\"\nMüşteri: \"2-3 gündür, evet arasın\"\nSen: \"Teşekkürler, arıza kaydınızı ilettim.\n\n[ARIZA: Tower Reformer - Tekerlek sesi, 2-3 gündür devam ediyor]\n\n[ISSUE]\n\nEn kısa sürede sizi arayacak.\"\n\n**ÖNEMLI**: Müşteri bilgi + onay birlikte verirse tekrar soru sorma!\n\n## ROTA REFORMER HAKKINDA\n\n- 2017'den beri İstanbul ve Adana'da üretim\n- Türkiye Jimnastik Federasyonu cihaz sponsoru\n- Avrupa, Dubai, Azerbaycan, Gürcistan'a ihracat\n- İthal ahşap, paslanmaz krom, araba derisi kalitesi\n- Üniversite ve kurumlara ekipman desteği\n\n## NAKLİYE\n\nMüşteri nakliye sorarsa:\n1. \"Hangi ürünü düşünüyorsunuz? Kaç adet?\"\n2. Cevap gelirse: \"Koordinatörümüz nakliye ve özel fiyat konuşsun mu?\"\n3. \"Evet\" → [SALES] + [TALEP] özeti\n\n(Not: İstanbul, İzmir, Ankara, Bursa ücretsiz ama bunu koordinatör söyleyecek)\n\n## TESLİMAT & KURULUM\n\n- Lojistik/ambar gönderimi\n- Kurulum videoları + görüntülü destek\n- 7-10 gün teslimat\n- Renk değişiminde süre uzayabilir\n\n## SHOWROOM\n\n\"Ürünleri görmek isterseniz 4.Levent'te stüdyomuz var. Konum ve iletişim bilgisi paylaşayım mı?\"\n\n---\n\n**SON HATIRLATMA**:\n1. Doğal ve akıcı konuş, robotik cümleler kullanma\n2. Müşterinin hangi mesajını alıntıladığını MUTLAKA kontrol et\n3. [SALES] veya [ISSUE] kullanırken MUTLAKA [TALEP] veya [ARIZA] özeti ekle!`;\n\n// ============================================\n// BUILD MESSAGES WITH QUOTED MESSAGE CONTEXT\n// ============================================\n\nconst messages = [{ role: 'system', content: systemPrompt }];\n\n// Add chat history\nif (chatHistory && chatHistory.length > 0) {\n  for (const item of chatHistory) {\n    if (item.json.role && item.json.content) {\n      messages.push({\n        role: item.json.role,\n        content: item.json.content\n      });\n    }\n  }\n}\n\n// ✅ NEW: Add context about quoted message if exists\nlet enhancedUserMessage = userMessage;\n\nif (isReplyToMessage && quotedMessage) {\n  // Add explicit context about which message user is replying to\n  enhancedUserMessage = `[Müşteri aşağıdaki mesajımı alıntılayarak/yanıtlayarak cevap veriyor]\n\nAlıntılanan mesajım: \"${quotedMessage}\"\n\nMüşterinin yanıtı: ${userMessage}\n\n[Dikkat: Müşteri bu mesaja özel yanıt veriyor, hangi konuya yanıt verdiğini kontrol et! Eğer fiyat mesajına yanıt verdiyse ve onay ifadesi kullandıysa (evet/olur/arasın) → [SALES] tag kullan ve MUTLAKA [TALEP] özeti ekle!]`;\n}\n\n// Add user message (enhanced with quote context if exists)\nmessages.push({ role: 'user', content: enhancedUserMessage });\n\nconsole.log('=== BUILD MESSAGES ===');\nconsole.log(`Messages: ${messages.length}, History: ${chatHistory ? chatHistory.length : 0}`);\nconsole.log(`Enhanced message: ${isReplyToMessage ? 'YES' : 'NO'}`);\n\nreturn {\n  json: {\n    messages: messages,\n    userMessage: userMessage, // Original message for DB\n    sessionId: sessionId,\n    recipientNumber: recipientNumber,\n    isReplyToMessage: isReplyToMessage,\n    quotedMessage: quotedMessage\n  }\n};\n"
+      },
+      "id": "build-messages",
+      "name": "Build Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        400
+      ],
+      "notes": "V2: Quote detection + TALEP/ARIZA tags in system prompt"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "chat_history",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $json.sessionId }}",
+            "role": "user",
+            "content": "={{ $json.userMessage }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "save-user-message",
+      "name": "Save User Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        740,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "gLNF0iMifzK0leX1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: \"gpt-4o-mini\", messages: $('Build Messages').first().json.messages, temperature: 0.7, max_tokens: 500 } }}",
+        "options": {}
+      },
+      "id": "openai-http",
+      "name": "OpenAI API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        940,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "QHlET4NCnG3Pea5C",
+          "name": "OpenAi account"
+        }
+      },
+      "notes": "ADDED: max_tokens: 500 for cost optimization"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "chat_history",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Build Messages').first().json.sessionId }}",
+            "role": "assistant",
+            "content": "={{ $json.choices[0].message.content }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "save-assistant-response",
+      "name": "Save Assistant Response",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1140,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "gLNF0iMifzK0leX1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// PARSE RESPONSE NODE - V2\n// Extracts [TALEP] and [ARIZA] info for coordinator\n// ============================================\n\nconst buildData = $('Build Messages').first().json;\nconst openaiResponse = $json;\n\nconst aiMessage = openaiResponse.choices[0].message.content;\nconst recipientNumber = buildData.recipientNumber;\n\nconsole.log('=== AI RESPONSE ===');\nconsole.log(aiMessage);\n\nconst hasImageTag = aiMessage.includes('[IMAGE:');\nconst hasCatalogTag = aiMessage.includes('[CATALOG]');\nconst hasPricelistTag = aiMessage.includes('[PRICELIST]');\nconst hasSalesTag = aiMessage.includes('[SALES]');\nconst hasIssueTag = aiMessage.includes('[ISSUE]');\n\n// ✅ NEW: Extract TALEP and ARIZA info\nlet talepInfo = null;\nlet arizaInfo = null;\n\nif (hasSalesTag) {\n  const talepMatch = aiMessage.match(/\\[TALEP:([^\\]]+)\\]/);\n  if (talepMatch) {\n    talepInfo = talepMatch[1].trim();\n  }\n}\n\nif (hasIssueTag) {\n  const arizaMatch = aiMessage.match(/\\[ARIZA:([^\\]]+)\\]/);\n  if (arizaMatch) {\n    arizaInfo = arizaMatch[1].trim();\n  }\n}\n\nconsole.log('=== EXTRACTED INFO ===');\nconsole.log(`TALEP: ${talepInfo}`);\nconsole.log(`ARIZA: ${arizaInfo}`);\n\nlet productName = 'Chair';\nif (hasImageTag) {\n  const match = aiMessage.match(/\\[IMAGE:([^\\]]+)\\]/);\n  if (match) productName = match[1].trim();\n}\n\nlet cleanMessage = aiMessage\n  .replace(/\\[IMAGE:[^\\]]+\\]/g, '')\n  .replace(/\\[CATALOG\\]/g, '')\n  .replace(/\\[PRICELIST\\]/g, '')\n  .replace(/\\[TALEP:[^\\]]+\\]/g, '') // ✅ NEW: Remove TALEP tag from customer message\n  .replace(/\\[SALES\\]/g, '')\n  .replace(/\\[ARIZA:[^\\]]+\\]/g, '') // ✅ NEW: Remove ARIZA tag from customer message\n  .replace(/\\[ISSUE\\]/g, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nif (!cleanMessage || cleanMessage.length === 0) {\n  if (hasCatalogTag) cleanMessage = 'Katalogumuz aşağıda.';\n  else if (hasPricelistTag) cleanMessage = 'Fiyat listemiz aşağıda.';\n  else if (hasImageTag) cleanMessage = `${productName} görsellerini gönderiyorum.`;\n  else if (hasSalesTag) cleanMessage = 'Koordinatörümüze ilettim, en kısa sürede arayacak.';\n  else if (hasIssueTag) cleanMessage = 'Arıza kaydınızı ilettim, en kısa sürede arayacak.';\n  else cleanMessage = 'Teşekkür ederim!';\n}\n\nreturn {\n  json: {\n    recipient: recipientNumber,\n    customerMessage: cleanMessage,\n    hasImageTag,\n    hasCatalogTag,\n    hasPricelistTag,\n    hasSalesTag,\n    hasIssueTag,\n    talepInfo,  // ✅ NEW: Pass to coordinator node\n    arizaInfo,  // ✅ NEW: Pass to coordinator node\n    productName,\n    fullAiResponse: aiMessage\n  }\n};\n"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        400
+      ],
+      "notes": "V2: Extracts TALEP and ARIZA info for coordinator"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendText/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  text: $json.customerMessage\n} }}",
+        "options": {}
+      },
+      "id": "send-text-http",
+      "name": "Send Text HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasImageTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-image",
+      "name": "IF Image",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const productName = $json.productName;\nconst recipient = $json.recipient;\n\nconst productImages = {\n  'Combo Cadillac': [\n    '179gnPSBg-_GkSkJgkogd6x7tOb0X3Q0P',\n    '1a3GTjcwaTU_zX1eyBztNQcD-k2J1M39L',\n    '1pJhgllPH3nBW2AWUA4ZIb2CTSQrctGcc'\n  ],\n  'Tower Reformer': [\n    '1ynee91yEKnbSAC-Re-DFD4U0LpWbIRhv',\n    '1HdglQ2VZ1qYdieTA8e2pGIxmL54MqPrU',\n    '19DSBRkRrjcA-XIx_cFgzSv0oSEvP3AKx'\n  ],\n  'Chair': [\n    '1qWfFKxd6HCpOio5DqEnURT8hBsE_CZMU',\n    '1BTJ7G91L05LbrzQI5OfeXWqt_fY1kg1R',\n    '1CVmiRauex3ZILPcevQeGVU3b_svH_b6_'\n  ],\n  'Barrel': [\n    '1ye7RmXboj41tt3-io08yqpKvn5iYVbb2',\n    '1zJs3TywJVXm9u1S08TueH9ymAc8mWjwx',\n    '1wDvHZsglZFhMW_iMrjMl7Dp8Yo6Sssy5'\n  ]\n};\n\nconst imageIds = productImages[productName] || productImages['Chair'];\n\nreturn imageIds.map((imageId, index) => ({\n  json: {\n    recipient: recipient,\n    mediaUrl: `https://drive.google.com/uc?export=download&id=${imageId}`,\n    caption: index === 0 ? productName : '',\n    isLast: index === imageIds.length - 1\n  }\n}));"
+      },
+      "id": "prepare-images",
+      "name": "Prepare Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  mediatype: 'image',\n  media: $json.mediaUrl,\n  caption: $json.caption\n} }}",
+        "options": {}
+      },
+      "id": "send-image-http",
+      "name": "Send Image HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1640,
+        440
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasCatalogTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-catalog",
+      "name": "IF Catalog",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  mediatype: 'document',\n  media: 'https://drive.google.com/uc?export=download&id=1kBybhdNwcRqxQVgQ2kCHIZ4Nl40y1XUN',\n  fileName: 'Rota-Reformer-Katalog-2025.pdf',\n  caption: 'Rota Reformer Katalog 2025'\n} }}",
+        "options": {}
+      },
+      "id": "send-catalog-http",
+      "name": "Send Catalog HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        580
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasPricelistTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-pricelist",
+      "name": "IF Pricelist",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendMedia/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  number: $json.recipient,\n  mediatype: 'image',\n  media: 'https://drive.google.com/uc?export=download&id=1s7XmG10QgKcfOoulwWrSf64S3gaAENN0',\n  caption: '2025 Fiyat Listesi'\n} }}",
+        "options": {}
+      },
+      "id": "send-pricelist-http",
+      "name": "Send Pricelist HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        720
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasSalesTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-sales",
+      "name": "IF Sales",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendText/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\\n  number: '905539644020',\\n  text: `🔔 YENI SATIS TALEBI\\n\\nMusteri: ${$json.recipient}\\n\\n📦 TALEP:\\n${$json.talepInfo || 'Bilgi mevcut değil'}\\n\\n💬 Mesaj:\\n${$json.customerMessage}\\n\\nLutfen musteriyi arayin.`\\n} }}",
+        "options": {}
+      },
+      "id": "send-coordinator-http",
+      "name": "Send Coordinator HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        860
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      },
+      "notes": "V2: Shows detailed TALEP info to coordinator"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={ \"success\": true }",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasIssueTag }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-issue",
+      "name": "IF Issue",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.qotomasyon.com/message/sendText/rotawp",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\\n  number: '905539644020',\\n  text: `🔧 ARIZA KAYDI\\n\\nMusteri: ${$json.recipient}\\n\\n⚠️ ARIZA:\\n${$json.arizaInfo || 'Bilgi mevcut değil'}\\n\\n💬 Mesaj:\\n${$json.customerMessage}\\n\\nLutfen musteriyi arayin.`\\n} }}",
+        "options": {}
+      },
+      "id": "send-issue-coordinator-http",
+      "name": "Send Issue Coordinator HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        1000
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hAnQyV038yh6r3vs",
+          "name": "Header Auth account"
+        }
+      },
+      "notes": "V2: Shows detailed ARIZA info to coordinator"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Load Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Chat History": {
+      "main": [
+        [
+          {
+            "node": "Build Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Messages": {
+      "main": [
+        [
+          {
+            "node": "Save User Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save User Message": {
+      "main": [
+        [
+          {
+            "node": "OpenAI API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI API": {
+      "main": [
+        [
+          {
+            "node": "Save Assistant Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Assistant Response": {
+      "main": [
+        []
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Send Text HTTP",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF Image",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF Catalog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF Pricelist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF Sales",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Text HTTP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Image": {
+      "main": [
+        [
+          {
+            "node": "Prepare Images",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Images": {
+      "main": [
+        [
+          {
+            "node": "Send Image HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Image HTTP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Catalog": {
+      "main": [
+        [
+          {
+            "node": "Send Catalog HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Catalog HTTP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Pricelist": {
+      "main": [
+        [
+          {
+            "node": "Send Pricelist HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Pricelist HTTP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Sales": {
+      "main": [
+        [
+          {
+            "node": "Send Coordinator HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Coordinator HTTP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Issue": {
+      "main": [
+        [
+          {
+            "node": "Send Issue Coordinator HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Issue Coordinator HTTP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "v6-COMPLETE",
+  "tags": []
+}
