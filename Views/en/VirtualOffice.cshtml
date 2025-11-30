@@ -1,0 +1,240 @@
+@{
+    Layout = "~/Views/Shared/en/_Layout.cshtml";
+    ViewBag.PageType = "subpage";
+    BizWorld.Data.Models.Page Page = ViewBag.Page as BizWorld.Data.Models.Page;
+    var images = BizWorld.Data.Models.Image.GetList(Page.ID, 3);
+}
+@section head{
+    <link href="~/Content/css/virtual-office.min.css" rel="stylesheet">
+}
+<section class="details-page">
+    <div class="container">
+        @Html.Partial("en/Partials/_Breadcrumb", Page)
+        <div class="details-page__content">
+            @if (Page.Content != null)
+            {
+                <h2 class="text-center">@Html.Raw(Page.Content.Title)</h2>
+                <div class="text-center">@Html.Raw(Page.Content.Body)</div>
+                <br /><br />
+                <section class="packages animate">
+                    <h3 class="text-center">Bizworld Virtual Office Packages</h3>
+                    <div class="cards">
+                        <div class="card card-low">
+                            <img src="~/Content/images/virtual-office/ikon1.png" alt="Starter Package">
+                            <h4>Starter Package</h4>
+                            <p><b>Prices starting from ₺399</b></p>
+                            <ul>
+                                <li>Prestigious business address</li>
+                                <li>Biz Membership benefits</li>
+                            </ul>
+                            <a href="#contactModal" data-toggle="modal" data-target="#contactModal">Apply Now!</a>
+                        </div>
+
+                        <div class="card card-low">
+                            <img src="~/Content/images/virtual-office/ikon3.png" alt="Entrepreneur Package">
+                            <h4>Entrepreneur Package</h4>
+                            <p><b>Prices starting from ₺599</b></p>
+                            <ul>
+                                <li>Prestigious business address + legal use</li>
+                                <li>Mail and parcel handling</li>
+                                <li>Biz Membership benefits</li>
+                            </ul>
+                            <a href="#contactModal" data-toggle="modal" data-target="#contactModal">Apply Now!</a>
+                        </div>
+
+                        <div class="card card-low">
+                            <img src="~/Content/images/virtual-office/ikon2.png" alt="Premium Package">
+                            <h4>Premium Package</h4>
+                            <p><b>Prices starting from ₺799</b></p>
+                            <ul>
+                                <li>Prestigious business address + legal use</li>
+                                <li>Parcel reception and notification</li>
+                                <li>Meeting room usage</li>
+                            </ul>
+                            <a href="#contactModal" data-toggle="modal" data-target="#contactModal">Apply Now!</a>
+                        </div>
+                    </div>
+                </section>
+                <br /><br />
+                <!-- Adres Kutuları -->
+                <section class="locations animate">
+                    <h3 class="text-center">Where Would You Like to Establish Your Business?</h3>
+                    <div class="loc-cards">
+                        <div class="loc-card">
+                            <h4>MASLAK</h4>
+                            <p>Olive Plaza Ahi Evran Cad. No 11<br><strong>Maslak, Sarıyer</strong></p>
+                            <a href="https://www.bizworld.com.tr/en/our-locations/maslak">View Location</a>
+                        </div>
+                        <div class="loc-card">
+                            <h4>LEVENT</h4>
+                            <p>Karanfil Sokak Villa 13<br><strong>Levent, Beşiktaş</strong></p>
+                            <a href="https://www.bizworld.com.tr/en/our-locations/levent">View Location</a>
+                        </div>
+                        <div class="loc-card">
+                            <h4>ATAKENT</h4>
+                            <p>Çağla Plaza No 116 Kat 2<br><strong>Atakent, Ümraniye</strong></p>
+                            <a href="https://www.bizworld.com.tr/en/our-locations/umraniye">View Location</a>
+                        </div>
+                    </div>
+                </section>
+                <br /><br />
+<section class="faq animate">
+    <h3 class="text-center">Frequently Asked Questions</h3>
+    <div class="accordion">
+
+        <div class="accordion-item">
+            <button>What is a virtual office?</button>
+            <div class="panel">
+                <p>A virtual office is a modern office solution that provides a legal address, official correspondence reception, mail & parcel management, and professional secretarial support for your company without the need to rent a physical office. This way, you fulfill legal requirements while having a company address in a prestigious location.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>Is a virtual office legal? Can it be used for company formation?</button>
+            <div class="panel">
+                <p>Yes. A virtual office address is recognized as an official legal address by the tax office and trade registry office. It can easily be used for new company formation, branch opening, or address change procedures.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>Is a virtual office reliable?</button>
+            <div class="panel">
+                <p>Absolutely yes. A virtual office is a completely legal and reliable solution. It is accepted as a company address by the tax office, trade registry, and official institutions. At Bizworld, all your mail, parcels, and calls are managed securely; your information is protected according to confidentiality principles.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>How is mail and parcel management handled?</button>
+            <div class="panel">
+                <p>All your shipments are securely received by the Bizworld team. You are immediately notified; you can pick them up from our branch at your convenience, request storage, or have them forwarded to your desired address.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>Is there professional secretarial and phone service?</button>
+            <div class="panel">
+                <p>Yes. Within the scope of your package, your calls are answered professionally in your company name. You are immediately notified or the call is directed to the relevant person according to your request. This way, you create a corporate image in the eyes of your customers.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>Can I receive professional meeting room and guest reception services?</button>
+            <div class="panel">
+                <p>Yes. You can use modern and equipped meeting rooms at our Bizworld branches. Beyond the free hours included in your package, you have the option to rent additional hours. Your guests are welcomed and directed professionally by our reception team.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>What is coworking?</button>
+            <div class="panel">
+                <p>Coworking is a flexible and shared office environment where professionals, entrepreneurs, and freelancers from different sectors can work together. It offers a productive working opportunity with high-speed internet, comfortable spaces, refreshments, and networking opportunities.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>How can I use coworking spaces?</button>
+            <div class="panel">
+                <p>Depending on the virtual office package you choose, you can use coworking spaces free of charge on certain days. If you need more usage, you can gain unlimited access with advantageous additional packages.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>What is the difference between home office and virtual office?</button>
+            <div class="panel">
+                <p>With a home office, your company address becomes your home, which doesn't create a corporate image. You may also experience problems with mail-parcel delivery, may need to pay withholding tax, and your address may fall under commercial real estate. A virtual office offers you professional solutions such as a prestigious address, secretarial services, mail management, meeting rooms, and guest reception support.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>What are the advantages of a virtual office?</button>
+            <div class="panel">
+                <ul>
+                    <li>Prestigious business address</li>
+                    <li>Cost advantage</li>
+                    <li>Withholding tax exemption</li>
+                    <li>VAT invoice advantage</li>
+                    <li>Professional services (mail, parcel, phone)</li>
+                    <li>Flexible meeting and coworking usage</li>
+                    <li>Easy transition to a physical office as your business grows</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>Can I establish a company in Istanbul without investment costs?</button>
+            <div class="panel">
+                <p>Yes. Thanks to Bizworld virtual office, you can establish your company in prestigious areas of Istanbul (Levent, Maslak, Ümraniye Atakent) without paying high rent. You get your legal address, mail management, and support in all official processes.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button>How do I apply for a virtual office?</button>
+            <div class="panel">
+                <p><strong>For those with an existing company:</strong></p>
+                <ul>
+                    <li>A contract is made with the tax certificate, signature circular, and trade registry gazette.</li>
+                    <li>The service is activated on the same day.</li>
+                </ul>
+                <p><strong>For those in the company formation stage:</strong></p>
+                <ul>
+                    <li>Membership is initiated with the authorized person's ID, contact, and residence information.</li>
+                    <li>First, the virtual office contract is prepared, then the financial advisor makes official applications at the tax office and chamber of commerce.</li>
+                </ul>
+                <p>This way, you can establish your company quickly, reliably, and at a prestigious address, and focus on your business.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+                <br /><br />
+                <center>
+                    <section class="contact text-center animate">
+                        <h3>Grow Your Business with Bizworld!</h3>
+                        <p><strong>Phone:</strong> <a href="tel:+902124017070">+90 212 401 7070</a></p>
+                        <p><strong>Email:</strong> <a href="mailto:info@bizworld.com.tr">info@bizworld.com.tr</a></p>
+                    </section>
+                </center>
+                <br />
+                <hr />
+                <br />
+                <div style="max-width:800px; margin:0 auto;">
+                    @Html.Action("GetForm", new { path = "en/Partials/_ContactFormInner", pageID = Page.ID })
+                </div>
+
+            }
+
+        </div>
+    </div>
+</section>
+
+
+@section scripts{
+    <script>
+        var acc = document.querySelectorAll('.accordion-item button');
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].addEventListener('click', function () {
+                var panel = this.nextElementSibling;
+                this.classList.toggle('active');
+                if (panel.style.display === 'block') {
+                    panel.style.display = 'none';
+                } else {
+                    panel.style.display = 'block';
+                }
+            });
+        }
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.animate').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+}
